@@ -1,0 +1,269 @@
+
+footer {
+    font-family: Arial;
+    position:fixed;
+    text-align:center;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    z-index:1000;  
+   
+    color: white;
+    padding: 5px;
+    background-color: #3e3f3a;
+    border-top: solid 1px white;
+}
+
+footer a {
+    color: white;
+}
+
+.logo {
+    width: 160px;
+    margin-top: 7px;
+    margin-right: 15px;
+}
+
+.main-container {
+    margin-bottom: 10px;
+}
+
+#loading-content {
+    position: absolute;
+    background: #000000;
+    opacity: 0.9;
+    z-index: 100;
+    left: 0;
+    right: 0;
+    height: 100%;
+    text-align: center;
+    color: #FFFFFF;
+}
+
+#LR_Cancer_Type {
+    font-size: 18px;
+}
+
+#PA_Cancer_Type {
+    font-size: 18px;
+}
+
+#loading-spinner {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    z-index: -1;
+    margin-top: -33px;
+    /* half of the spinner's height */
+    margin-left: -33px;
+    /* half of the spinner's width */
+}
+
+#loading-spinner_down {
+    position: absolute;
+    left: 50%;
+    top: 80%;
+    z-index: -1;
+    margin-top: -33px;
+    /* half of the spinner's height */
+    margin-left: -33px;
+    /* half of the spinner's width */
+}
+
+#loading-spinner_down_mi_CT_menu {
+    position: absolute;
+    left: 50%;
+    top: 80%;
+    z-index: -1;
+    margin-top: -33px;
+    /* half of the spinner's height */
+    margin-left: -33px;
+    /* half of the spinner's width */
+}
+
+#loading-spinner_miRNA_corplot {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    z-index: -1;
+    margin-top: -33px;
+    /* half of the spinner's height */
+    margin-left: -33px;
+    /* half of the spinner's width */
+}
+
+#loading-spinner_down_m_CT_menu {
+    position: absolute;
+    left: 50%;
+    top: 80%;
+    z-index: -1;
+    margin-top: -33px;
+    /* half of the spinner's height */
+    margin-left: -33px;
+    /* half of the spinner's width */
+}
+
+#loading-spinner_mRNA_corplot {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    z-index: -1;
+    margin-top: -33px;
+    /* half of the spinner's height */
+    margin-left: -33px;
+    /* half of the spinner's width */
+}
+
+#loading-spinner_KEGG {
+    position: absolute;
+    left: 50%;
+    top: 10%;
+    z-index: -1;
+    margin-top: -33px;
+    /* half of the spinner's height */
+    margin-left: -33px;
+    /* half of the spinner's width */
+}
+
+#loading-spinner_U_KEGG {
+    position: absolute;
+    left: 50%;
+    top: 10%;
+    z-index: -1;
+    margin-top: -33px;
+    /* half of the spinner's height */
+    margin-left: -33px;
+    /* half of the spinner's width */
+}
+
+#loading-spinner_GO {
+    position: absolute;
+    left: 50%;
+    top: 10%;
+    z-index: -1;
+    margin-top: -33px;
+    /* half of the spinner's height */
+    margin-left: -33px;
+    /* half of the spinner's width */
+}
+
+#loading-spinner_U_GO {
+    position: absolute;
+    left: 50%;
+    top: 10%;
+    z-index: -1;
+    margin-top: -33px;
+    /* half of the spinner's height */
+    margin-left: -33px;
+    /* half of the spinner's width */
+}
+
+#loading-spinner_up {
+    position: absolute;
+    left: 50%;
+    top: 30%;
+    z-index: -1;
+    margin-top: -33px;
+    /* half of the spinner's height */
+    margin-left: -33px;
+    /* half of the spinner's width */
+}
+
+#plot.recalculating {
+    z-index: -2;
+}
+
+#CT_Mi_txt_summary_up {
+    color: red;
+}
+
+#CT_Mi_txt_summary_down {
+    color: green;
+}
+
+#CT_M_txt_summary_down {
+    color: green;
+}
+
+#CT_M_txt_summary_up {
+    color: red;
+}
+
+#go_tutorial_text {
+    position: absolute;
+    left: 50%;
+}
+
+#go_tutorial_text {}
+
+.methylation-btn {
+    min-width: 60px;
+}
+
+.modal-dialog {
+    width: 1000px;
+}
+
+#tutorialTable a {
+    cursor: pointer;
+}
+
+.row-warning-red {
+    color: red;
+    font-weight: bold;
+}
+
+.row-warning-green {
+    color: #00E000;
+    font-weight: bold;
+}
+
+.correlationTable {
+    width: 100%;
+}
+
+.correlationTable th {
+    background-color: #0080FF;
+    color: white;
+    height: 30px;
+}
+
+.correlationTable tr {
+    background-color: #D2E9FF;
+    height: 30px;
+}
+
+.correlationImg {
+    width: 400px;
+    position: relative;
+}
+
+.aftImg {
+    position: relative;
+    width: 100%;
+    text-align: center;
+}
+
+/* 多層次選單 */
+ul.nav li {
+    position: relative;
+}
+
+ul.nav li ul {
+    display: none;
+    float: left;
+    position: absolute;
+    margin: 0;
+    padding: 0;
+}
+
+ul.nav li:hover > ul {
+    display: block;
+}
+
+ul.nav ul li:hover > ul {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 100%;
+}

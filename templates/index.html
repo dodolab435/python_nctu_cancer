@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div id="main_structure">
+
+   {% include "nav.html" %}
+
+
+   <div class="container main-container">
+      <div class="tab-content">
+         <h2 style="text-align:center;">DoSurvive</h2>
+
+         <hr>
+
+         <div>DoSurvive is a user-friendly cancer prognostic biomarker centered database and webtool. It allows users to explore:</div>
+         <p></p>
+         <ol>
+            <li>Gene expression in cancers and survival analysis correlation</li>
+            <li><span style="color:#0080FF;">Log-rank test</span> of different molecular types in specific cancers</li>
+            <li><span style="color:#0080FF;">Cox proportional hazard model</span> model results of different molecular types in specific cancers</li>
+            <li><span style="color:#0080FF;">Accelerated Failure-Time model (AFT)</span> results of different molecular types in specific cancers</li>
+            <li>Gene expression level in normal and tumor samples</li>
+            <li>CpG site & mRNA correlation in cancer</li>
+            <li><span style="font-weight:bold; color:#0080FF;">Combined Effects, allow users to observe the relationship between multiple genes and survival, which is an innovative method by DoSurvival.</span></li>
+         </ol>
+
+         <div>DoSurvive provides multiple different entry points for users with different needs. The following cancer types are included in DoSurvive: Adrenocortical carcinoma (ACC), Bladder
+            Urothelial Carcinoma (BLCA), Breast invasive carcinoma (BRCA), Colon adenocarcinoma (COAD),
+            Cervical squamous cell carcinoma and endocervical adenocarcinoma (CESC), Cholangiocarcinoma
+            (CHOL), Lymphoid Neoplasm Diffuse Large B-cell Lymphoma (DLBC), Esophageal carcinoma (ESCA),
+            Glioblastoma multiforme (GBM), Head and Neck squamous cell carcinoma (HNSC), Kidney
+            Chromophobe (KICH), Kidney renal clear cell carcinoma (KIRC), Kidney renal papillary cell
+            carcinoma (KIRP), Acute Myeloid Leukemia (LAML), Brain Lower Grade Glioma (LGG), Liver
+            hepatocellular carcinoma (LIHC), Lung adenocarcinoma (LUAD), Lung squamous cell carcinoma
+            (LUSC), Mesothelioma (MESO), Ovarian serous cystadenocarcinoma (OV), Pancreatic adenocarcinoma
+            (PAAD), Pheochromocytoma and Paraganglioma (PCPG), Prostate adenocarcinoma (PRAD), Rectum
+            adenocarcinoma (READ), Sarcoma (SARC), Skin Cutaneous Melanoma (SKCM), Stomach adenocarcinoma
+            (STAD), Testicular Germ Cell Tumors (TGCT), Thyroid carcinoma (THCA), Thymoma (THYM), Uterine
+            Corpus Endometrial Carcinoma (UCEC), Uterine Carcinosarcoma (UCS), Uveal Melanoma (UVM).</div>
+         <br>
+         <div>New users are advised to read our <a
+               onclick="javascript:location.href='/tutorial'"
+               style="color:#0080FF; text-decoration: underline; cursor: pointer;">tutorial</a> before
+            using DoSurvive.</div>
+
+         <div style="text-align: center;">
+            <img src="static/images/DoSurvive_dodo (1).png" style="width: 80%;" />
+            <br>
+         </div>
+      </div>
+   </div>
+
+</div>
+
+{% endblock %}

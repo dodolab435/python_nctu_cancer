@@ -1,0 +1,676 @@
+{% extends 'base.html' %}
+
+{% block style %}
+<style>
+    .search-result {
+        background-color: white;
+        position: absolute;
+        width: 100%;
+        border: 1px #E0E0E0 solid;
+        z-index: 1000;
+        display: none;
+        padding: 5px;
+    }
+    .search-result > div {
+        cursor: pointer;
+        padding: 5px;
+    }
+    .search-result > div:hover {
+        background-color: aqua;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="main_structure">
+
+   {% include "nav.html" %}
+
+
+   <div class="container main-container">
+      <div class="tab-content">
+
+         <p>
+            *If search for a  <span style="color: red;">miRNA</span>, the gene name should be like "hsa-miR-20a-5p".
+         </p>
+
+         <div class="row">
+            <div class="col-lg-6">
+               <div class="input-group">
+                  <input id="input-gene" type="text" class="form-control" placeholder="Enter a gene name">
+                  <span class="input-group-btn">
+                     <button id="btn-gene" class="btn btn-default" type="button">Browse</button>
+                  </span>
+               </div>
+               <div class="search-result"></div>
+            </div>
+         </div>
+         
+         <br />
+         <div class="row">
+            <ul id="nav-gene" class="nav nav-tabs" style="display: none;">
+               <li id="tab-gene-protein">
+                  <a href="#tab-gene-1" data-toggle="tab" data-value="protein">Protein</a>
+               </li>
+               <li id="tab-gene-mirna">
+                  <a href="#tab-gene-3" data-toggle="tab" data-value="miRNA">miRNA</a>
+               </li>
+               <li id="tab-gene-mrna">
+                  <a href="#tab-gene-4" data-toggle="tab" data-value="mRNA">mRNA</a>
+               </li>
+               <li id="tab-gene-lncrna">
+                  <a href="#tab-gene-5" data-toggle="tab" data-value="lncrna">lncrna</a>
+               </li>
+               <li id="tab-gene-methylation27k">
+                  <a href="#tab-gene-6" data-toggle="tab" data-value="methylation27k">methylation27k</a>
+               </li>
+               <li id="tab-gene-methylation450k">
+                  <a href="#tab-gene-7" data-toggle="tab" data-value="methylation450k">methylation450k</a>
+               </li>
+            </ul>
+            <div class="tab-content tab-gent-content">
+               <div id="tab-gene-1" class="tab-pane fade tab-tag">
+
+                  <ul class="nav nav-tabs nav-gene-sub-tab" style="display: none;">
+                     <li id="tab-browse-gene-protein-logrank" class="active">
+                        <a href="#tbl-gene-sub-protein-logrank" data-toggle="tab" data-category="protein"
+                           data-value="logrank">Log Rank</a>
+                     </li>
+                     <li id="tab-browse-gene-protein-cox">
+                        <a href="#tbl-gene-sub-protein-cox" data-toggle="tab" data-category="protein"
+                           data-value="cox">Cox</a>
+                     </li>
+                     <li id="tab-browse-gene-protein-aft">
+                        <a href="#tbl-gene-sub-protein-aft" data-toggle="tab" data-category="protein"
+                           data-value="aft">AFT</a>
+                     </li>
+                     <li id="tab-browse-gene-protein-expression">
+                        <a href="#tbl-gene-sub-protein-expression" data-toggle="tab" data-category="protein"
+                           data-value="expression">Expression</a>
+                     </li>
+                  </ul>
+
+                  <div style="font-weight: bold; padding-top: 10px;" class="survival_type">
+                     Select survival type:&emsp;
+                     <label><input type="radio" class="browse-gene-radio" name="browse-gene-protein" value="os"
+                           checked /> Overall</label>&emsp;
+                     <label><input type="radio" class="browse-gene-radio" name="browse-gene-protein" value="pfi" />
+                        Progression-Free</label>&emsp;
+                     <label><input type="radio" class="browse-gene-radio" name="browse-gene-protein" value="dfi" />
+                        Disease-Free</label>&emsp;
+                     <label><input type="radio" class="browse-gene-radio" name="browse-gene-protein" value="dss" />
+                        Disease-Specific</label>
+                  </div>
+
+                  <div class="row">
+                     <div class="col-sm-12">
+                        <select class="form-control nav-select-gene">
+                           <option value="logrank" data-category="protein">Log Rank</option>
+                           <option value="cox" data-category="protein">Cox</option>
+                           <option value="aft" data-category="protein">AFT</option>
+                           <option value="expression" data-category="protein">Expression</option>
+                        </select>
+                     </div>
+                  </div>
+
+                  <div class="row">
+                      <div class="col-sm-12">
+                          <input type="button" class="download-data" value="Download" />
+                      </div>
+                  </div>
+
+                  <div class="row">
+                     <div class="col-sm-12">
+                        <div id="plot-container8">
+                           <div class="tab-content">
+                              <div id="tbl-gene-sub-protein-logrank" class="tab-pane fade active in">
+                                 <table id="tbl-gene-protein-logrank" width="100%"></table>
+                              </div>
+                              <div id="tbl-gene-sub-protein-cox" class="tab-pane fade">
+                                 <table id="tbl-gene-protein-cox" width="100%"></table>
+                              </div>
+                              <div id="tbl-gene-sub-protein-aft" class="tab-pane fade">
+                                 <table id="tbl-gene-protein-aft" width="100%"></table>
+                              </div>
+                              <div id="tbl-gene-sub-protein-expression" class="tab-pane fade">
+                                 <table id="tbl-gene-protein-expression" width="100%"></table>
+                              </div><br><br><br>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+
+               <div id="tab-gene-3" class="tab-pane fade tab-tag">
+                  <ul class="nav nav-tabs nav-gene-sub-tab" style="display: none;">
+                     <li id="tab-browse-gene-mirna-logrank" class="active">
+                        <a href="#tbl-gene-sub-mirna-logrank" data-toggle="tab" data-category="mirna"
+                           data-value="logrank">Log Rank</a>
+                     </li>
+                     <li id="tab-browse-gene-mirna-cox">
+                        <a href="#tbl-gene-sub-mirna-cox" data-toggle="tab" data-category="mirna"
+                           data-value="cox">Cox</a>
+                     </li>
+                     <li id="tab-browse-gene-mirna-aft">
+                        <a href="#tbl-gene-sub-mirna-aft" data-toggle="tab" data-category="mirna"
+                           data-value="aft">AFT</a>
+                     </li>
+                     <li id="tab-browse-gene-mirna-expression">
+                        <a href="#tbl-gene-sub-mirna-expression" data-toggle="tab" data-category="mirna"
+                           data-value="expression">Expression</a>
+                     </li>
+                  </ul>
+
+                  <div style="font-weight: bold; padding-top: 10px;" class="survival_type">
+                     Select survival type:&emsp;
+                     <label><input type="radio" class="browse-gene-radio" name="browse-gene-mirna" value="os" checked />
+                        Overall</label>&emsp;
+                     <label><input type="radio" class="browse-gene-radio" name="browse-gene-mirna" value="pfi" />
+                        Progression-Free</label>&emsp;
+                     <label><input type="radio" class="browse-gene-radio" name="browse-gene-mirna" value="dfi" />
+                        Disease-Free</label>&emsp;
+                     <label><input type="radio" class="browse-gene-radio" name="browse-gene-mirna" value="dss" />
+                        Disease-Specific</label>
+                  </div>
+
+                  <div class="row">
+                     <div class="col-sm-12">
+                        <select class="form-control nav-select-gene">
+                           <option value="logrank" data-category="mirna">Log Rank</option>
+                           <option value="cox" data-category="mirna">Cox</option>
+                           <option value="aft" data-category="mirna">AFT</option>
+                           <option value="expression" data-category="mirna">Expression</option>
+                        </select>
+                     </div>
+                  </div>
+
+                  <div class="row">
+                      <div class="col-sm-12">
+                          <input type="button" class="download-data" value="Download" />
+                      </div>
+                  </div>
+
+                  <div class="row">
+                     <div class="col-sm-12">
+                        <div id="plot-container8">
+                           <div class="tab-content">
+                              <div id="tbl-gene-sub-mirna-logrank" class="tab-pane fade active in">
+                                 <table id="tbl-gene-mirna-logrank" width="100%"></table>
+                              </div>
+                              <div id="tbl-gene-sub-mirna-cox" class="tab-pane fade">
+                                 <table id="tbl-gene-mirna-cox" width="100%"></table>
+                              </div>
+                              <div id="tbl-gene-sub-mirna-aft" class="tab-pane fade">
+                                 <table id="tbl-gene-mirna-aft" width="100%"></table>
+                              </div>
+                              <div id="tbl-gene-sub-mirna-expression" class="tab-pane fade">
+                                 <table id="tbl-gene-mirna-expression" width="100%"></table>
+                              </div><br><br><br>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+
+               <div id="tab-gene-4" class="tab-pane fade tab-tag">
+                  <ul class="nav nav-tabs nav-gene-sub-tab" style="display: none;">
+                     <li id="tab-browse-gene-mrna-logrank" class="active">
+                        <a href="#tbl-gene-sub-mrna-logrank" data-toggle="tab" data-category="mrna"
+                           data-value="logrank">Log Rank</a>
+                     </li>
+                     <li id="tab-browse-gene-mrna-cox">
+                        <a href="#tbl-gene-sub-mrna-cox" data-toggle="tab" data-category="mrna" data-value="cox">Cox</a>
+                     </li>
+                     <li id="tab-browse-gene-mrna-aft">
+                        <a href="#tbl-gene-sub-mrna-aft" data-toggle="tab" data-category="mrna" data-value="aft">AFT</a>
+                     </li>
+                     <li id="tab-browse-gene-mrna-expression">
+                        <a href="#tbl-gene-sub-mrna-expression" data-toggle="tab" data-category="mrna"
+                           data-value="expression">Expression</a>
+                     </li>
+                  </ul>
+
+                  <div style="font-weight: bold; padding-top: 10px;" class="survival_type">
+                     Select survival type:&emsp;
+                     <label><input type="radio" class="browse-gene-radio" name="browse-gene-mrna" value="os" checked />
+                        Overall</label>&emsp;
+                     <label><input type="radio" class="browse-gene-radio" name="browse-gene-mrna" value="pfi" />
+                        Progression-Free</label>&emsp;
+                     <label><input type="radio" class="browse-gene-radio" name="browse-gene-mrna" value="dfi" />
+                        Disease-Free</label>&emsp;
+                     <label><input type="radio" class="browse-gene-radio" name="browse-gene-mrna" value="dss" />
+                        Disease-Specific</label>
+                  </div>
+
+                  <div class="row">
+                     <div class="col-sm-12">
+                        <select class="form-control nav-select-gene">
+                           <option value="logrank" data-category="mrna">Log Rank</option>
+                           <option value="cox" data-category="mrna">Cox</option>
+                           <option value="aft" data-category="mrna">AFT</option>
+                           <option value="expression" data-category="mrna">Expression</option>
+                        </select>
+                     </div>
+                  </div>
+                  
+                  <div class="row">
+                     <div class="col-sm-12">
+                         <input type="button" class="download-data" value="Download" />
+                     </div>
+                 </div>
+
+                  <div class="row">
+                     <div class="col-sm-12">
+                        <div id="plot-container8">
+                           <div class="tab-content">
+                              <div id="tbl-gene-sub-mrna-logrank" class="tab-pane fade active in">
+                                 <table id="tbl-gene-mrna-logrank" width="100%"></table>
+                              </div>
+                              <div id="tbl-gene-sub-mrna-cox" class="tab-pane fade">
+                                 <table id="tbl-gene-mrna-cox" width="100%"></table>
+                              </div>
+                              <div id="tbl-gene-sub-mrna-aft" class="tab-pane fade">
+                                 <table id="tbl-gene-mrna-aft" width="100%"></table>
+                              </div>
+                              <div id="tbl-gene-sub-mrna-expression" class="tab-pane fade">
+                                 <table id="tbl-gene-mrna-expression" width="100%"></table>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+
+               <div id="tab-gene-5" class="tab-pane fade tab-tag">
+                  <ul class="nav nav-tabs nav-gene-sub-tab" style="display: none;">
+                     <li id="tab-browse-gene-lncrna-logrank" class="active">
+                        <a href="#tbl-gene-sub-lncrna-logrank" data-toggle="tab" data-category="lncrna"
+                           data-value="logrank">Log Rank</a>
+                     </li>
+                     <li id="tab-browse-gene-lncrna-cox">
+                        <a href="#tbl-gene-sub-lncrna-cox" data-toggle="tab" data-category="lncrna"
+                           data-value="cox">Cox</a>
+                     </li>
+                     <li id="tab-browse-gene-lncrna-aft">
+                        <a href="#tbl-gene-sub-lncrna-aft" data-toggle="tab" data-category="lncrna"
+                           data-value="aft">AFT</a>
+                     </li>
+                     <li id="tab-browse-gene-lncrna-expression">
+                        <a href="#tbl-gene-sub-lncrna-expression" data-toggle="tab" data-category="lncrna"
+                           data-value="expression">Expression</a>
+                     </li>
+                  </ul>
+
+                  <div style="font-weight: bold; padding-top: 10px;" class="survival_type">
+                     Select survival type:&emsp;
+                     <label><input type="radio" class="browse-gene-radio" name="browse-gene-lncrna" value="os"
+                           checked /> Overall</label>&emsp;
+                     <label><input type="radio" class="browse-gene-radio" name="browse-gene-lncrna" value="pfi" />
+                        Progression-Free</label>&emsp;
+                     <label><input type="radio" class="browse-gene-radio" name="browse-gene-lncrna" value="dfi" />
+                        Disease-Free</label>&emsp;
+                     <label><input type="radio" class="browse-gene-radio" name="browse-gene-lncrna" value="dss" />
+                        Disease-Specific</label>
+                  </div>
+
+                  <div class="row">
+                     <div class="col-sm-12">
+                        <select class="form-control nav-select-gene">
+                           <option value="logrank" data-category="lncrna">Log Rank</option>
+                           <option value="cox" data-category="lncrna">Cox</option>
+                           <option value="aft" data-category="lncrna">AFT</option>
+                           <option value="expression" data-category="lncrna">Expression</option>
+                        </select>
+                     </div>
+                  </div>
+
+                  <div class="row">
+                     <div class="col-sm-12">
+                         <input type="button" class="download-data" value="Download" />
+                     </div>
+                 </div>
+
+                  <div class="row">
+                     <div class="col-sm-12">
+                        <div id="plot-container8">
+                           <div class="tab-content">
+                              <div id="tbl-gene-sub-lncrna-logrank" class="tab-pane fade active in">
+                                 <table id="tbl-gene-lncrna-logrank" width="100%"></table>
+                              </div>
+                              <div id="tbl-gene-sub-lncrna-cox" class="tab-pane fade">
+                                 <table id="tbl-gene-lncrna-cox" width="100%"></table>
+                              </div>
+                              <div id="tbl-gene-sub-lncrna-aft" class="tab-pane fade">
+                                 <table id="tbl-gene-lncrna-aft" width="100%"></table>
+                              </div>
+                              <div id="tbl-gene-sub-lncrna-expression" class="tab-pane fade">
+                                 <table id="tbl-gene-lncrna-expression" width="100%"></table>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+
+               <div id="tab-gene-6" class="tab-pane fade tab-tag">
+                  <ul class="nav nav-tabs nav-gene-sub-tab" style="display: none;">
+                     <li id="tab-browse-gene-methylation27k-logrank" class="active">
+                        <a href="#tbl-gene-sub-methylation27k-logrank" data-toggle="tab" data-category="methylation27k"
+                           data-value="logrank">Log Rank</a>
+                     </li>
+                     <li id="tab-browse-gene-methylation27k-cox">
+                        <a href="#tbl-gene-sub-methylation27k-cox" data-toggle="tab" data-category="methylation27k"
+                           data-value="cox">Cox</a>
+                     </li>
+                     <li id="tab-browse-gene-methylation27k-aft">
+                        <a href="#tbl-gene-sub-methylation27k-aft" data-toggle="tab" data-category="methylation27k"
+                           data-value="aft">AFT</a>
+                     </li>
+                     <li id="tab-browse-gene-methylation27k-expression">
+                        <a href="#tbl-gene-sub-methylation27k-expression" data-toggle="tab"
+                           data-category="methylation27k" data-value="expression">Expression</a>
+                     </li>
+                  </ul>
+
+                  <div style="font-weight: bold; padding-top: 10px;" class="survival_type">
+                     Select survival type:&emsp;
+                     <label><input type="radio" class="browse-gene-radio" name="browse-gene-methylation27k" value="os"
+                           checked /> Overall</label>&emsp;
+                     <label><input type="radio" class="browse-gene-radio" name="browse-gene-methylation27k"
+                           value="pfi" /> Progression-Free</label>&emsp;
+                     <label><input type="radio" class="browse-gene-radio" name="browse-gene-methylation27k"
+                           value="dfi" /> Disease-Free</label>&emsp;
+                     <label><input type="radio" class="browse-gene-radio" name="browse-gene-methylation27k"
+                           value="dss" /> Disease-Specific</label>
+                  </div>
+
+                  <div class="row">
+                     <div class="col-sm-12">
+                        <select class="form-control nav-select-gene">
+                           <option value="logrank" data-category="methylation27k">Log Rank</option>
+                           <option value="cox" data-category="methylation27k">Cox</option>
+                           <option value="aft" data-category="methylation27k">AFT</option>
+                           <option value="expression" data-category="methylation27k">Expression</option>
+                        </select>
+                     </div>
+                  </div>
+
+                  <div class="row">
+                      <div class="col-sm-12">
+                          <input type="button" class="download-data" value="Download" />
+                      </div>
+                  </div>
+
+                  <div class="row">
+                     <div class="col-sm-12">
+                        <div id="plot-container8">
+                           <div class="tab-content">
+                              <div id="tbl-gene-sub-methylation27k-logrank" class="tab-pane fade active in">
+                                 <table id="tbl-gene-methylation27k-logrank" width="100%"></table>
+                              </div>
+                              <div id="tbl-gene-sub-methylation27k-cox" class="tab-pane fade">
+                                 <table id="tbl-gene-methylation27k-cox" width="100%"></table>
+                              </div>
+                              <div id="tbl-gene-sub-methylation27k-aft" class="tab-pane fade">
+                                 <table id="tbl-gene-methylation27k-aft" width="100%"></table>
+                              </div>
+                              <div id="tbl-gene-sub-methylation27k-expression" class="tab-pane fade">
+                                 <table id="tbl-gene-methylation27k-expression" width="100%"></table>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+
+               <div id="tab-gene-7" class="tab-pane fade tab-tag">
+                  <ul class="nav nav-tabs nav-gene-sub-tab" style="display: none;">
+                     <li id="tab-browse-gene-methylation450k-logrank" class="active">
+                        <a href="#tbl-gene-sub-methylation450k-logrank" data-toggle="tab"
+                           data-category="methylation450k" data-value="logrank">Log Rank</a>
+                     </li>
+                     <li id="tab-browse-gene-methylation450k-cox">
+                        <a href="#tbl-gene-sub-methylation450k-cox" data-toggle="tab" data-category="methylation450k"
+                           data-value="cox">Cox</a>
+                     </li>
+                     <li id="tab-browse-gene-methylation450k-aft">
+                        <a href="#tbl-gene-sub-methylation450k-aft" data-toggle="tab" data-category="methylation450k"
+                           data-value="aft">AFT</a>
+                     </li>
+                     <li id="tab-browse-gene-methylation450k-expression">
+                        <a href="#tbl-gene-sub-methylation450k-expression" data-toggle="tab"
+                           data-category="methylation450k" data-value="expression">Expression</a>
+                     </li>
+                  </ul>
+
+                  <div style="font-weight: bold; padding-top: 10px;" class="survival_type">
+                     Select survival type:&emsp;
+                     <label><input type="radio" class="browse-gene-radio" name="browse-gene-methylation450k" value="os"
+                           checked /> Overall</label>&emsp;
+                     <label><input type="radio" class="browse-gene-radio" name="browse-gene-methylation450k"
+                           value="pfi" /> Progression-Free</label>&emsp;
+                     <label><input type="radio" class="browse-gene-radio" name="browse-gene-methylation450k"
+                           value="dfi" /> Disease-Free</label>&emsp;
+                     <label><input type="radio" class="browse-gene-radio" name="browse-gene-methylation450k"
+                           value="dss" /> Disease-Specific</label>
+                  </div>
+
+                  <div class="row">
+                     <div class="col-sm-12">
+                        <select class="form-control nav-select-gene">
+                           <option value="logrank" data-category="methylation450k">Log Rank</option>
+                           <option value="cox" data-category="methylation450k">Cox</option>
+                           <option value="aft" data-category="methylation450k">AFT</option>
+                           <option value="expression" data-category="methylation450k">Expression</option>
+                        </select>
+                     </div>
+                  </div>
+
+                  <div class="row">
+                      <div class="col-sm-12">
+                          <input type="button" class="download-data" value="Download" />
+                      </div>
+                  </div>
+
+                  <div class="row">
+                     <div class="col-sm-12">
+                        <div id="plot-container8">
+                           <div class="tab-content">
+                              <div id="tbl-gene-sub-methylation450k-logrank" class="tab-pane fade active in">
+                                 <table id="tbl-gene-methylation450k-logrank" width="100%"></table>
+                              </div>
+                              <div id="tbl-gene-sub-methylation450k-cox" class="tab-pane fade">
+                                 <table id="tbl-gene-methylation450k-cox" width="100%"></table>
+                              </div>
+                              <div id="tbl-gene-sub-methylation450k-aft" class="tab-pane fade">
+                                 <table id="tbl-gene-methylation450k-aft" width="100%"></table>
+                              </div>
+                              <div id="tbl-gene-sub-methylation450k-expression" class="tab-pane fade">
+                                 <table id="tbl-gene-methylation450k-expression" width="100%"></table>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+
+         <div class="row">
+            <div class="col-sm-12">
+               <div id="chart-gene-option" class="shiny-plot-output" style="margin-top: 20px; display: none;">
+                  Color of group high:
+                  <select class="chart-gene-option-color1">
+                     <option value="black">black</option>
+                     <option value="gray">gray</option>
+                     <option value="silver">silver</option>
+                     <option value="red" selected>red</option>
+                     <option value="pink">pink</option>
+                     <option value="orange">orange</option>
+                     <option value="blue">blue</option>
+                     <option value="green">green</option>
+                     <option value="violet">violet</option>
+                  </select>&emsp;
+                  Line width (H):
+                  <select class="chart-gene-option-width1">
+                     <option value="1.0">1.0</option>
+                     <option value="2.0" selected>2.0</option>
+                     <option value="3.0">3.0</option>
+                     <option value="4.0">4.0</option>
+                     <option value="5.0">5.0</option>
+                     <option value="6.0">6.0</option>
+                     <option value="7.0">7.0</option>
+                     <option value="8.0">8.0</option>
+                     <option value="9.0">9.0</option>
+                  </select>&emsp;
+                  Color of group low:
+                  <select class="chart-gene-option-color2">
+                     <option value="black">black</option>
+                     <option value="gray">gray</option>
+                     <option value="silver">silver</option>
+                     <option value="red">red</option>
+                     <option value="pink">pink</option>
+                     <option value="orange">orange</option>
+                     <option value="blue" selected>blue</option>
+                     <option value="green">green</option>
+                     <option value="violet">violet</option>
+                  </select>&emsp;
+                  Line width (L):
+                  <select class="chart-gene-option-width2">
+                     <option value="1.0">1.0</option>
+                     <option value="2.0" selected>2.0</option>
+                     <option value="3.0">3.0</option>
+                     <option value="4.0">4.0</option>
+                     <option value="5.0">5.0</option>
+                     <option value="6.0">6.0</option>
+                     <option value="7.0">7.0</option>
+                     <option value="8.0">8.0</option>
+                     <option value="9.0">9.0</option>
+                  </select>&emsp;
+                  Censors color (H):
+                  <select class="chart-gene-option-marker-color1">
+                     <option value="black" selected>black</option>
+                     <option value="gray">gray</option>
+                     <option value="silver">silver</option>
+                     <option value="red">red</option>
+                     <option value="pink">pink</option>
+                     <option value="orange">orange</option>
+                     <option value="blue">blue</option>
+                     <option value="green">green</option>
+                     <option value="violet">violet</option>
+                  </select>&emsp;
+                  Censors color (L):
+                  <select class="chart-gene-option-marker-color2">
+                     <option value="black" selected>black</option>
+                     <option value="gray">gray</option>
+                     <option value="silver">silver</option>
+                     <option value="red">red</option>
+                     <option value="pink">pink</option>
+                     <option value="orange">orange</option>
+                     <option value="blue">blue</option>
+                     <option value="green">green</option>
+                     <option value="violet">violet</option>
+                  </select>&emsp;
+
+                  <br><br>
+                  Follow up threshold (years):
+                  <select id="chart-time">
+                      <option value="0">-</option>
+                      <option value="3">3</option>
+                      <option value="5">5</option>
+                      <option value="10">10</option>
+                  </select>
+
+                  &emsp;
+                  Kaplan plot for EGFR
+                  <input type="number" id="chart-LP" placeholder="Lower Percentile" min="0" max="100" style="width: 150px;" />
+                  <input type="number" id="chart-HP" placeholder="Upper Percentile" min="0" max="100" style="width: 150px;" />
+
+                  <input type="button" value="Submit" onclick="chgChartTime(true)" />
+               </div>
+               <div id="chart-gene" class="shiny-plot-output" style="width: 100% ; height: 600px"></div>
+               <div id="chart-cox" class="shiny-plot-output" style="width: 100%;"></div>
+            </div>
+         </div>
+         <div class="row">
+            <div class="col-sm-12">
+               <div id="chart2-gene" class="shiny-plot-output" style="width: 100% ; height: 600px"></div>
+               <div id="chart-cox-option" class="shiny-plot-output" style="width: 100%; margin-bottom: 30px;"></div>
+            </div>
+         </div>
+         <div class="row">
+            <div class="col-sm-12">
+               <div id="chart-upload" class="shiny-plot-output" style="width: 100% ; height: 600px"></div>
+            </div>
+         </div>
+
+      </div>
+   </div>
+
+</div>
+
+<form id="downloadForm" method="post" target="_blank"></form>
+
+<script>
+
+   var MY_DATA = {
+      selectedCategory: '',
+      selectedCancerType: "",
+      selectedTab: "logrank",
+      selectedMetaFeature: "",
+      modalCategory: '',
+      modalCancerType: "",
+      modalTab: "",
+      methylationGene: "",
+      entrez: "",
+      selectedMetaFeature: "",
+      chartCategory: "",
+      chartJsonResult: [],
+      chartData: [],
+      cancer_abbr: {
+         "ACC": "Adrenocortical carcinoma",
+         "BLCA": "Bladder Urothelial Carcinoma",
+         "BRCA": "Breast invasive carcinoma",
+         "CESC": "Cervical squamous cell carcinoma and endocervical adenocarcinoma",
+         "CHOL": "Cholangiocarcinoma",
+         "COAD": "Colon adenocarcinoma",
+         "COADREAD": "Colon adenocarcinoma/Rectum adenocarcinoma Esophageal carcinoma",
+         "DLBC": "Lymphoid Neoplasm Diffuse Large B-cell Lymphoma	",
+         "ESCA": "Esophageal carcinoma",
+         "FPPP": "FFPE Pilot Phase II",
+         "GBM": "Glioblastoma multiforme",
+         "GBMLGG": "Glioma",
+         "HNSC": "Head and Neck squamous cell carcinoma",
+         "KICH": "Kidney Chromophobe",
+         "KIPAN": "Pan-kidney cohort (KICH+KIRC+KIRP)",
+         "KIRC": "Kidney renal clear cell carcinoma",
+         "KIRP": "Kidney renal papillary cell carcinoma",
+         "LAML": "Acute Myeloid Leukemia",
+         "LGG": "Brain Lower Grade Glioma",
+         "LIHC": "Liver hepatocellular carcinoma",
+         "LUAD": "Lung adenocarcinoma",
+         "LUSC": "Lung squamous cell carcinoma",
+         "MESO": "Mesothelioma",
+         "OV": "Ovarian serous cystadenocarcinoma",
+         "PAAD": "Pancreatic adenocarcinoma",
+         "PCPG": "Pheochromocytoma and Paraganglioma",
+         "PRAD": "Prostate adenocarcinoma",
+         "READ": "Rectum adenocarcinoma",
+         "SARC": "Sarcoma",
+         "SKCM": "Skin Cutaneous Melanoma",
+         "STAD": "Stomach adenocarcinoma",
+         "STES": "Stomach and Esophageal carcinoma",
+         "TGCT": "Testicular Germ Cell Tumors",
+         "THCA": "Thyroid carcinoma",
+         "THYM": "Thymoma",
+         "UCEC": "Uterine Corpus Endometrial Carcinoma",
+         "UCS": "Uterine Carcinosarcoma",
+         "UVM": "Uveal Melanoma",
+      },
+      loadingFlag: 0,
+      gene_options: {},
+      drop_image_columns: []
+   }
+</script>
+<script src="static/gene.js"></script>
+{% endblock %}

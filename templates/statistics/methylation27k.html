@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div id="main_structure">
+
+   {% include "nav.html" %}
+
+   <div class="container">
+      <div class="tab-content" data-tabsetid="2132">
+         <h2>Characteristics of the HumanMethylation27k datasets in DoSurvive.</h2>
+         <br>
+         <h4>Number of Patients used in HumanMethylation27k array.</h4>
+         <table class="table table-bordered">
+            <tbody>
+               <tr style="text-align: center;">
+                  <td>Cancer Types</td>
+                  <td>Patients (OS)</td>
+                  <td>Patients (DSS)</td>
+                  <td>Patients (DFI)</td>
+                  <td>Patients (PFI)</td>
+                  <td>Gene (OS)</td>
+               </tr>
+               <tr style="text-align: center;">
+                  <td style="text-align: left;">Breast invasive carcinoma (BRCA)</td>
+                  <td>314</td>
+                  <td>306</td>
+                  <td>269</td>
+                  <td>314</td>
+                  <td>19127</td>
+               </tr>
+               <tr style="text-align: center;">
+                  <td style="text-align: left;">Colon adenocarcinoma (COAD)</td>
+                  <td>164</td>
+                  <td>164</td>
+                  <td>77</td>
+                  <td>164</td>
+                  <td>18386</td>
+               </tr>
+               <tr style="text-align: center;">
+                  <td style="text-align: left;">Glioblastoma multiforme (GBM)</td>
+                  <td>283</td>
+                  <td>256</td>
+                  <td>0</td>
+                  <td>283</td>
+                  <td>17645</td>
+               </tr>
+               <tr style="text-align: center;">
+                  <td style="text-align: left;">Kidney renal clear cell carcinoma (KIRC)</td>
+                  <td>219</td>
+                  <td>216</td>
+                  <td>23</td>
+                  <td>218</td>
+                  <td>19611</td>
+               </tr>
+               <tr style="text-align: center;">
+                  <td style="text-align: left;">Kidney renal papillary cell carcinoma (KIRP)</td>
+                  <td>16</td>
+                  <td>16</td>
+                  <td>7</td>
+                  <td>16</td>
+                  <td>17996</td>
+               </tr>
+               <tr style="text-align: center;">
+                  <td style="text-align: left;">Acute Myeloid Leukemia (LAML)</td>
+                  <td>180</td>
+                  <td>0</td>
+                  <td>0</td>
+                  <td>0</td>
+                  <td>18302</td>
+               </tr>
+               <tr style="text-align: center;">
+                  <td style="text-align: left;">Lung adenocarcinoma (LUAD)</td>
+                  <td>65</td>
+                  <td>58</td>
+                  <td>32</td>
+                  <td>65</td>
+                  <td>18983</td>
+               </tr>
+               <tr style="text-align: center;">
+                  <td style="text-align: left;">Lung squamous cell carcinoma (LUSC)</td>
+                  <td>133</td>
+                  <td>124</td>
+                  <td>54</td>
+                  <td>133</td>
+                  <td>18595</td>
+               </tr>
+               <tr style="text-align: center;">
+                  <td style="text-align: left;">Ovarian serous cystadenocarcinoma (OV)</td>
+                  <td>568</td>
+                  <td>531</td>
+                  <td>277</td>
+                  <td>568</td>
+                  <td>16223</td>
+               </tr>
+               <tr style="text-align: center;">
+                  <td style="text-align: left;">Rectum adenocarcinoma (READ)</td>
+                  <td>68</td>
+                  <td>68</td>
+                  <td>16</td>
+                  <td>68</td>
+                  <td>17300</td>
+               </tr>
+               <tr style="text-align: center;">
+                  <td style="text-align: left;">Stomach adenocarcinoma (STAD)</td>
+                  <td>47</td>
+                  <td>29</td>
+                  <td>4</td>
+                  <td>47</td>
+                  <td>17300</td>
+               </tr>
+               <tr style="text-align: center;">
+                  <td style="text-align: left;">Uterine Corpus Endometrial Carcinoma (UCEC)</td>
+                  <td>117</td>
+                  <td>117</td>
+                  <td>105</td>
+                  <td>117</td>
+                  <td>18022</td>
+               </tr>
+            </tbody>
+         </table>
+         <div>*OS: Overall survival, DSS: Disease-specific survival, DFI: Disease-free survival, PFI: Progression-free survival</div>
+         <br>
+         <br>
+         <br>
+      </div>
+   </div>
+
+</div>
+
+{% endblock %}

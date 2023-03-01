@@ -1,0 +1,188 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div id="main_structure">
+
+   {% include "nav.html" %}
+
+   <div class="container">
+      <div class="tab-content" data-tabsetid="2132">
+         <h2>Characteristics of the LncRNA datasets in DoSurvive.</h2>
+         <br>
+         <h4>Number of Patients tested with LncRNA.</h4>
+
+         <table class="table table-bordered">
+            <tbody>
+               <tr style="text-align: center;">
+                  <td>Cancer Types</td>
+                  <td>Patients (OS)</td>
+                  <td>Patients (DSS)</td>
+                  <td>Patients (DFI)</td>
+                  <td>Patients (PFI)</td>
+                  <td>Gene (OS)</td>
+               </tr>
+               <tr style="text-align: center;">
+                  <td style="text-align: left;">Bladder Urothelial Carcinoma (BLCA)</td>
+                  <td>251</td>
+                  <td>245</td>
+                  <td>115</td>
+                  <td>252</td>
+                  <td>4572</td>
+               </tr>
+               <tr style="text-align: center;">
+                  <td style="text-align: left;">Breast invasive carcinoma (BRCA)</td>
+                  <td>837</td>
+                  <td>819</td>
+                  <td>729</td>
+                  <td>837</td>
+                  <td>4973</td>
+               </tr>
+               <tr style="text-align: center;">
+                  <td style="text-align: left;">Cervical squamous cell carcinoma and endocervical adenocarcinoma (CESC)
+                  </td>
+                  <td>196</td>
+                  <td>194</td>
+                  <td>127</td>
+                  <td>196</td>
+                  <td>4475</td>
+               </tr>
+               <tr style="text-align: center;">
+                  <td style="text-align: left;">Colon adenocarcinoma (COAD)</td>
+                  <td>157</td>
+                  <td>157</td>
+                  <td>76</td>
+                  <td>157</td>
+                  <td>1388</td>
+               </tr>
+               <tr style="text-align: center;">
+                  <td style="text-align: left;">Glioblastoma multiforme (GBM)</td>
+                  <td>153</td>
+                  <td>140</td>
+                  <td>1</td>
+                  <td>153</td>
+                  <td>5555</td>
+               </tr>
+               <tr style="text-align: center;">
+                  <td style="text-align: left;">Head and Neck squamous cell carcinoma (HNSC)</td>
+                  <td>427</td>
+                  <td>404</td>
+                  <td>117</td>
+                  <td>427</td>
+                  <td>4179</td>
+               </tr>
+               <tr style="text-align: center;">
+                  <td style="text-align: left;">Kidney Chromophobe (KICH)</td>
+                  <td>65</td>
+                  <td>65</td>
+                  <td>29</td>
+                  <td>65</td>
+                  <td>4605</td>
+               </tr>
+               <tr style="text-align: center;">
+                  <td style="text-align: left;">Kidney renal clear cell carcinoma (KIRC)</td>
+                  <td>461</td>
+                  <td>450</td>
+                  <td>79</td>
+                  <td>460</td>
+                  <td>5317</td>
+               </tr>
+               <tr style="text-align: center;">
+                  <td style="text-align: left;">Kidney renal papillary cell carcinoma (KIRP)</td>
+                  <td>197</td>
+                  <td>194</td>
+                  <td>106</td>
+                  <td>196</td>
+                  <td>4822</td>
+               </tr>
+               <tr style="text-align: center;">
+                  <td style="text-align: left;">Brain Lower Grade Glioma (LGG)</td>
+                  <td>484</td>
+                  <td>476</td>
+                  <td>123</td>
+                  <td>484</td>
+                  <td>5629</td>
+               </tr>
+               <tr style="text-align: center;">
+                  <td style="text-align: left;">Liver hepatocellular carcinoma (LIHC)</td>
+                  <td>200</td>
+                  <td>195</td>
+                  <td>157</td>
+                  <td>200</td>
+                  <td>3711</td>
+               </tr>
+               <tr style="text-align: center;">
+                  <td style="text-align: left;">Lung adenocarcinoma (LUAD)</td>
+                  <td>480</td>
+                  <td>446</td>
+                  <td>285</td>
+                  <td>480</td>
+                  <td>5093</td>
+               </tr>
+               <tr style="text-align: center;">
+                  <td style="text-align: left;">Lung squamous cell carcinoma (LUSC)</td>
+                  <td>217</td>
+                  <td>189</td>
+                  <td>108</td>
+                  <td>217</td>
+                  <td>4993</td>
+               </tr>
+               <tr style="text-align: center;">
+                  <td style="text-align: left;">Ovarian serous cystadenocarcinoma (OV)</td>
+                  <td>410</td>
+                  <td>380</td>
+                  <td>198</td>
+                  <td>410</td>
+                  <td>5278</td>
+               </tr>
+               <tr style="text-align: center;">
+                  <td style="text-align: left;">Prostate adenocarcinoma (PRAD)</td>
+                  <td>374</td>
+                  <td>373</td>
+                  <td>279</td>
+                  <td>374</td>
+                  <td>4928</td>
+               </tr>
+               <tr style="text-align: center;">
+                  <td style="text-align: left;">Rectum adenocarcinoma (READ)</td>
+                  <td>71</td>
+                  <td>71</td>
+                  <td>18</td>
+                  <td>71</td>
+                  <td>1391</td>
+               </tr>
+               <tr style="text-align: center;">
+                  <td style="text-align: left;">Skin Cutaneous Melanoma (SKCM)</td>
+                  <td>216</td>
+                  <td>212</td>
+                  <td>0</td>
+                  <td>217</td>
+                  <td>4336</td>
+               </tr>
+               <tr style="text-align: center;">
+                  <td style="text-align: left;">Stomach adenocarcinoma (STAD)</td>
+                  <td>284</td>
+                  <td>265</td>
+                  <td>172</td>
+                  <td>284</td>
+                  <td>5052</td>
+               </tr>
+               <tr style="text-align: center;">
+                  <td style="text-align: left;">Uterine Corpus Endometrial Carcinoma (UCEC)</td>
+                  <td>316</td>
+                  <td>316</td>
+                  <td>264</td>
+                  <td>316</td>
+                  <td>1497</td>
+               </tr>
+            </tbody>
+         </table>
+         <div>*OS: Overall survival, DSS: Disease-specific survival, DFI: Disease-free survival, PFI: Progression-free survival</div>
+         <br>
+         <br>
+         <br>
+      </div>
+   </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,136 @@
+<!-- Navbar -->
+<nav class="navbar navbar-default navbar-static-top" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <!-- <span class="navbar-brand">DoSurvive</span> -->
+            <img src="static/images/logo_up.png" class="logo" />
+        </div>
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav shiny-tab-input" id="page">
+                <li {% if path_info == '/' %} class="active" {% endif %}>
+                    <a href="/">Home</a>
+                </li>
+                <li class="dropdown {% if path_info == '/gene' or path_info == '/tab1' or path_info == '/browse' %} active {% endif %}">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                        Browse Database
+                        <b class="caret"></b>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a>Select a Cancer and a Gene</a>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a href="tab1?category=protein"><span>Protein</span></a>
+                                </li>
+                                <li>
+                                    <a href="tab1?category=mirna"><span>miRNA</span></a>
+                                </li>
+                                <li>
+                                    <a href="tab1?category=mrna"><span>mRNA</span></a>
+                                </li>
+                                <li>
+                                    <a href="tab1?category=lncrna"><span>lncRNA</span></a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a>Select a Cancer</a>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a href="browse?category=protein"><span>Protein</span></a>
+                                </li>
+                                <li>
+                                    <a href="browse?category=mirna"><span>miRNA</span></a>
+                                </li>
+                                <li>
+                                    <a href="browse?category=mrna"><span>mRNA</span></a>
+                                </li>
+                                <li>
+                                    <a href="browse?category=lncrna"><span>lncRNA</span></a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a href="gene">Select a Gene</a>
+                        </li>
+                    </ul>
+                </li>
+                <li {% if path_info == '/tab2' or path_info == '/more_gene' %} class="active" {% endif %}>
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                        Explore Combined Effects
+                        <b class="caret"></b>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a>Two Genes</a>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a href="tab2?category1=mrna&category2=mrna">mRNA & mRNA</a>
+                                </li>
+                                <li>
+                                    <a href="tab2?category1=mrna&category2=mirna">mRNA & miRNA</a>
+                                </li>
+                                <li>
+                                    <a href="tab2?category1=mrna&category2=lncrna">mRNA & lncRNA</a>
+                                </li>
+                                <li>
+                                    <a href="tab2?category1=mirna&category2=mirna">miRNA & miRNA</a>
+                                </li>
+                                <li>
+                                    <a href="tab2?category1=mirna&category2=lncrna">miRNA & lncRNA</a>
+                                </li>
+                                <li>
+                                    <a href="tab2?category1=lncrna&category2=lncrna">lncRNA & lncRNA</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a href="more_gene">More than Two Genes</a>
+                        </li>
+                    </ul>
+                </li>
+                
+                <li {% if path_info == '/tutorial' %} class="active" {% endif %}>
+                    <a href="tutorial">Tutorial</a>
+                </li>
+                <li {% if path_info == '/statistics' %} class="active" {% endif %}>
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                        Statistics
+                        <b class="caret"></b>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a href="statistics">Number of Patients Tested</a>
+                        </li>
+                        <li>
+                            <a>Number of Features Tested</a>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a href="statistics?category=protein">Protein</a>
+                                </li>
+                                <li>
+                                    <a href="statistics?category=mirna">miRNA</a>
+                                </li>
+                                <li>
+                                    <a href="statistics?category=mrna">mRNA</a>
+                                </li>
+                                <li>
+                                    <a href="statistics?category=lncrna">lncRNA</a>
+                                </li>
+                                <li>
+                                    <a href="statistics?category=methylation27k">Methylation 27k</a>
+                                </li>
+                                <li>
+                                    <a href="statistics?category=methylation450k">Methylation 450k</a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+                <li {% if path_info == '/faq' %} class="active" {% endif %}>
+                    <a href="faq">FAQ</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>

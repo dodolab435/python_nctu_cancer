@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div id="main_structure">
+
+   {% include "nav.html" %}
+
+   <div class="container">
+      <br class="tab-content" data-tabsetid="2132">
+         <div style="text-align:center;"><h1><font color="#8282FF">FAQs</font></h1></div>
+         <h3>1. What is DoSurvive</h3>
+         <span style='line-height: 30px;font-size:15px;font-width:15px'>DoSurvive is a database and tool for survival analysis of data for 33 cancer types and a number of
+            covariates including the expression levels of proteins, mRNA, miRNA, lncRNA and methylation levels of CpG sites.
+            Additionally, DoSurvive provides <strong style="color: red;">"Explore Combined Effect"</strong> whereby the can
+            perform real-time survival analysis for a combination of genes, including mRNAs, miRNAs,and lncRNAs. DoSurvive aims to
+            offer biologists and cancer researchers a platform for quickly and easily exploring potential prognosis biomarkers in
+            cancer.
+         </span><br>
+
+         <h3>2. What data are in DoSurvive?</h3>
+         <span style='line-height: 30px;font-size:15px;font-width:15px'>There are two kinds of data: clinical data, and quantitative features. These include expression
+            levels of CpG sites in the genome.<br>
+            All the expression values  for mRNA, miRNA and protein and methylation data for
+            33 cancer types in TCGA were downloaded from Broad GDAC Firehose. The
+            expression data for lncRNA were downloaded from <a href="https://ibl.mdanderson.org/tanric/_design/basic/main.html">TANRIC</a>
+            database (Li J, et al.). The clinical data and the survival information, including overaal survival (OS), disease
+            specific survival (DSS), diseaase-free survival (DFI), and progression-free survival (PFS), were downloaded from
+            <a hresf="https://gdc.cancer.gov/about-gdc">Pan-Cancer Atlas</a>.
+
+
+
+         </span>
+
+         <h3>3. How to use DoSurvive?</h3>
+         <span style='line-height: 30px;font-size:15px;font-width:15px'>There are two main entry points: browsing the database, and real-time survival analysis. A user who is interested in  the survival analysis results for a specific single gene or a specific cancer type can click "Browse Database" to browse the precalculated database. A user who is interested in the combined effect of multiple genes can click "Inquiry into Combined Effects" to perform a Log-rank test, or run a Cox proportional hazards model or Accelerated failure-time (AFT) model.</span>
+
+         <h3>4. What are the data preprocessing steps in DoSurvive?</h3>
+         <span style='line-height: 30px;font-size:15px;font-width:15px'>Only genes/proteins with non-zero values in more than 75% of the samples were included in DoSurvive. Also, patients with incomplete clinical data were excluded from Cox regression and Accelerated failure-time model analyses.</span>
+
+         <h3>5. Can I use the figures or analysis results from DoSurvive in my publications?</h3>
+         <span style='line-height: 30px;font-size:15px;font-width:15px'>Yes. If you use the results tables and/or figure in your research, please cite DoSurvive.</span>
+
+         <h3>6. Has the raw data been normalized in the survival analysis?</h3>
+         <span style='line-height: 30px;font-size:15px;font-width:15px'>Yes. The raw expression levels and methylation levels were normalized by rank-based inverse normal transformation for the Cox regression and Accelerated failure-time model analyses.</span>
+
+         <h3>7. What is "Two genes" analysis?</h3>
+         <span style='line-height: 30px;font-size:15px;font-width:15px'>In "Two genes" analysis, the user can investigate the combined effect of two genes on prognosis using Log-rank tests, Cox regression and Accelerated failure-time models, both the normalized expression levels and relevant clinical features are used in building the model.
+         For the non-parametric method, Log-rank test patients
+         are grouped into two groups based on the medians of the two genes. All of the patients
+         are classified into four groups: high in both genes, high in the first one and low in
+         the second one, low in the first one and high in the second one, and low in both
+         genes. Based on these four groups, the user can divide all the patients into
+          two groups and perform a long-rank test for the difference between these two groups.
+         </span>
+
+
+         <h3>8. What is ">2 genes" analysis?</h3>
+         <span style='line-height: 30px;font-size:15px;font-width:15px'>
+            In “>2 genes” analysis, the user can investigate the combined effect of multiple genes on prognosis, using
+            Cox regression and failure-time model analyses involving both the normalized expression levels and relevant clinical features.
+         </span>
+
+         <h3>9. Can I download the tables from DoSurvive?</h3>
+         <span style='line-height: 30px;font-size:15px;font-width:15px'>Yes. Both the precalculated survival analysis results and the raw data used for the statistical analysis
+            can be downloaded. The user can use the "Download" button above each table to download the precalculated results, or use
+            the download hyperlink below each survival plot to download the data used for survival analysis.
+         </span>
+
+         <h3>10. Which web browsers should I use with DoSurvive?</h3>
+         <span style='line-height: 30px;font-size:15px;font-width:15px'>HTML5-compliant browsers such as Safari, Chrome and Firefox, are recommended.</span>
+
+         <h3>11. What if I have another questions?</h3>
+         <span style='line-height: 30px;font-size:15px;font-width:15px'>DoSurvive was developed by <a href="https://fullofbeans.lab.nycu.edu.tw/?page_id=333&lang=en">Molecular Bioinformatics Lab</a>, National Yang Ming Chiao Tung University, Taiwan 300, R.O.C. Please contact
+            us via email to <a href="mailto:wu0857208.bi08g@nctu.edu.tw">wu0857208.bi08g@nctu.edu.tw.</a></span>
+
+
+         <br>
+         <br>
+         <br>
+         <br>
+         <br>
+         <br>
+         
+
+
+      </div>
+   </div>
+
+</div>
+
+{% endblock %}
