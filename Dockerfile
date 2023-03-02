@@ -1,5 +1,5 @@
 # 指定基礎映像
-FROM python:3.7
+FROM python:3.9
 
 # 設定工作目錄
 WORKDIR /app
@@ -8,6 +8,7 @@ WORKDIR /app
 COPY . /app
 
 # 安裝必要的套件
+RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
 # 啟動Django伺服器
