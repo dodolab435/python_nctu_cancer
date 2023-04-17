@@ -218,7 +218,7 @@ class NewAft:
             list1 = df1.loc[x].tolist()
             if 'NA' in list1:
                 temp.append(x)
-        df1.drop(df1.index[[temp]], inplace=True)
+        df1.drop(df1.index[np.array(temp)], inplace=True)
 
         if df1.empty:
             raise Exception("DataFrame is empty")
@@ -280,7 +280,7 @@ class NewAft:
             list1 = df1.loc[x].tolist()
             if 'NA' in list1:
                 temp.append(x)
-        df1.drop(df1.index[[temp]], inplace=True)
+        df1.drop(df1.index[np.array(temp)], inplace=True)
 
         if df1.empty:
             raise Exception("DataFrame is empty")

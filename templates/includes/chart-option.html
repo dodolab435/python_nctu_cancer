@@ -1,0 +1,166 @@
+<div class="row">
+    <div id="chart-option" class="shiny-plot-output col-sm-12" style="margin-top: 20px; display:none;">
+        Color of group 1 :
+        <select class="chart-option-color1">
+            <option value="black">black</option>
+            <option value="gray">gray</option>
+            <option value="silver">silver</option>
+            <option value="red" selected>red</option>
+            <option value="pink">pink</option>
+            <option value="orange">orange</option>
+            <option value="blue">blue</option>
+            <option value="green">green</option>
+            <option value="violet">violet</option>
+        </select>&emsp;
+        Line width (1):
+        <select class="chart-option-width1">
+            <option value="1.0">1.0</option>
+            <option value="2.0" selected>2.0</option>
+            <option value="3.0">3.0</option>
+            <option value="4.0">4.0</option>
+            <option value="5.0">5.0</option>
+            <option value="6.0">6.0</option>
+            <option value="7.0">7.0</option>
+            <option value="8.0">8.0</option>
+            <option value="9.0">9.0</option>
+        </select>&emsp;
+        Color of group 2:
+        <select class="chart-option-color2">
+            <option value="black">black</option>
+            <option value="gray">gray</option>
+            <option value="silver">silver</option>
+            <option value="red">red</option>
+            <option value="pink">pink</option>
+            <option value="orange">orange</option>
+            <option value="blue" selected>blue</option>
+            <option value="green">green</option>
+            <option value="violet">violet</option>
+        </select>&emsp;
+        Line width (2):
+        <select class="chart-option-width2">
+            <option value="1.0">1.0</option>
+            <option value="2.0" selected>2.0</option>
+            <option value="3.0">3.0</option>
+            <option value="4.0">4.0</option>
+            <option value="5.0">5.0</option>
+            <option value="6.0">6.0</option>
+            <option value="7.0">7.0</option>
+            <option value="8.0">8.0</option>
+            <option value="9.0">9.0</option>
+        </select>&emsp;
+        Censors color (1):
+        <select class="chart-option-marker-color1">
+            <option value="black" selected>black</option>
+            <option value="gray">gray</option>
+            <option value="silver">silver</option>
+            <option value="red">red</option>
+            <option value="pink">pink</option>
+            <option value="orange">orange</option>
+            <option value="blue">blue</option>
+            <option value="green">green</option>
+            <option value="violet">violet</option>
+        </select>&emsp;
+        Censors color (2):
+        <select class="chart-option-marker-color2">
+            <option value="black" selected>black</option>
+            <option value="gray">gray</option>
+            <option value="silver">silver</option>
+            <option value="red">red</option>
+            <option value="pink">pink</option>
+            <option value="orange">orange</option>
+            <option value="blue">blue</option>
+            <option value="green">green</option>
+            <option value="violet">violet</option>
+        </select>&emsp;
+        <br><br>
+        Follow up threshold (years):
+        <select id="chart-time" name="chart-time">
+            <option value="0">-</option>
+            <option value="3">3</option>
+            <option value="5">5</option>
+            <option value="10">10</option>
+        </select>
+        &emsp;
+        Kaplan plot for EGFR:
+        <select class="chart-option-cutoff">
+            <option value="upper Quartile">upper Quartile</option>
+            <option value="upper Tertile">upper Tertile</option>
+            <option value="Median" selected>Median</option>
+            <option value="lower Tertile">lower Tertile</option>
+            <option value="lower Quartile">lower Quartile</option>
+            <option value="Auto">Auto</option>
+            <option value="Tertile">Tertile</option>
+            <option value="Quartile">Quartile</option>
+            <option value="Manual">Manual</option>
+        </select>
+        
+        <script>
+            $(".chart-option-cutoff").change(function() {
+                lp = $(this).siblings("[name='chart-LP']");
+                hp = $(this).siblings("[name='chart-HP']");
+                lp.attr('disabled', true);
+                hp.attr('disabled', true);
+                switch (this.value) {
+                    case 'upper Quartile':
+                        lp.val(75);
+                        hp.val(25);
+                        break;
+                    case 'upper Tertile':
+                        lp.val(67);
+                        hp.val(33);
+                        break;
+                    case 'Median':
+                        lp.val(50);
+                        hp.val(50);
+                        break;
+                    case 'lower Tertile':
+                        lp.val(33);
+                        hp.val(67);
+                        break;
+                    case 'lower Quartile':
+                        lp.val(25);
+                        hp.val(75);
+                        break;
+                    case 'Tertile':
+                        lp.val(33);
+                        hp.val(33);
+                        break;
+                    case 'Quartile':
+                        lp.val(25);
+                        hp.val(25);
+                        break;
+                    case 'Auto':
+                        lp.val("");
+                        hp.val("");
+                        break;
+                    case 'Manual':
+                        lp.attr('disabled', false);
+                        hp.attr('disabled', false);
+                        break;
+                }
+            });
+        </script>
+
+        <input type="number" id="chart-LP" name="chart-LP" placeholder="Lower Percentile" min="0" max="100" style="width: 150px;" value="50" disabled/>
+        <input type="number" id="chart-HP" name="chart-HP" placeholder="Upper Percentile" min="0" max="100" style="width: 150px;" value="50" disabled/>
+        
+        <input type="button" value="Submit" name="chgChartTime" onclick="chgChartTime(false)" />
+    </div>
+    
+</div>
+<div class="row">
+    <div class="col-sm-12">
+        <div name="height_width_div" class="shiny-plot-output">
+            height:
+            <input type="number" id="chart_height" name="chart_height" min="0" />
+            width:
+            <input type="number" id="chart_width" name="chart_width" min="0" />
+            <input type="button" value="Download PDF" onclick="downloadPdf(false)" />
+        </div>
+        <div id="chart" name="chart" class="shiny-plot-output" style="width: 100% ; height: 600px"></div>
+        <div id="chart2" class="shiny-plot-output" style="width: 100% ; height: 600px"></div>
+        <div id="chart-cox" class="shiny-plot-output" style="width: 100%;"></div>
+        <div id="chart-cox-option" class="shiny-plot-output" style="width: 100%; margin-bottom: 30px;"></div>
+        <div id="chart-upload" class="shiny-plot-output" style="width: 100% ; height: 600px"></div>
+    </div>
+</div>

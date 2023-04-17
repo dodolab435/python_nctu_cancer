@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div id="main_structure">
+
+   {% include "nav.html" %}
+
+   <div class="container">
+      <form id="myForm">
+         <div class="row">
+            <div class="row col-lg-12" style="font-weight: bold; padding-top: 10px;">
+               <label>File :</label>
+               <input type="file" id="input-file" name="file" style="display: inline-block;vertical-align: middle;" />
+               <input type="button" value="load col" id="load_col" style="display: inline-block;vertical-align: middle;" />
+               <div id="col_select_div" hidden>
+                  <label>survival day col:</label>
+                  <select id="day_col" name="day_col"></select>
+                  <label>survival status col:</label>
+                  <select id="status_col" name="status_col"></select>
+                  <br>
+                  <label>gene expression col:</label>
+                  <div id="gene_expression_div" style="max-height:300px;overflow-y:auto;display: inline-block;vertical-align: middle;"></div>
+
+                  <select id="select_a" class="form-control nav-select-gene">
+                     <option value="logrank">Log Rank</option>
+                     <option value="cox">Cox</option>
+                     <option value="aft">AFT</option>
+                  </select>
+               </div>
+            </div>
+         </div>
+         <div class="row">
+            <div class="col-sm-4">
+               <br>
+               <input type="button" value="Submit" id="submit_button" class="btn btn-default action-button type-btn" onclick="chgChartTime(false)" />
+            </div>
+         </div>
+      </form>
+      {% include 'includes/chart-option.html' %}
+     </div>
+   </div>
+</div>
+
+<script src="static/upload_data.js"></script>
+<script src="static/chart.js"></script>
+{% endblock %}

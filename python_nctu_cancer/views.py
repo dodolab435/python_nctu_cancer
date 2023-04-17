@@ -1,9 +1,16 @@
 
 from datetime import datetime
-from email import header
-from django.http.response import JsonResponse
+
+from django.conf import settings
 from django.shortcuts import render
+from django.http import HttpResponse
+from django.http.response import JsonResponse
 from django.core.files.storage import FileSystemStorage
+
+from rest_framework import status
+from rest_framework.views import APIView
+from rest_framework.response import Response
+
 
 from python_nctu_cancer.models import CancerCategoryModel
 from python_nctu_cancer.models import CancerLogRankModel
@@ -20,29 +27,20 @@ from python_nctu_cancer.TwoGene import TwoGene
 from python_nctu_cancer.CoxAftTwoGene import CoxAftTwoGene
 from python_nctu_cancer.MoreGene import MoreGene
 
-import numpy as np
-import random
-import json
-import plotly as py
-from plotly.graph_objs import Data
-import subprocess
-import traceback
-import math
-import logging
 import os
 import re
-import pandas as pd
-import datetime
 import csv
+import json
+import datetime
+import traceback
+import subprocess
+import numpy as np
+import pandas as pd
+import plotly as py
 
-from rest_framework.views import APIView
-from rest_framework import generics
-from rest_framework.response import Response
-from rest_framework import status
-from rest_framework.decorators import action
-from django.conf import settings
-from django.http import HttpResponse, Http404
+import plotly.io as pio
 
+import multiprocessing
 
 class CategoryView(APIView):
     def get(self, request, *args, **kwargs):
@@ -529,6 +527,39 @@ class FeatureView(APIView):
         return Response(json.dumps(result))
 
 
+def mp_get_log_rank_pval(queue, new_df, exp_col, status_col, day_col, time, temp_L_per, temp_H_per):
+    
+    # multiprocessing process get log rank p-value
+    kmplotter = Kmplotter()
+    new_df = kmplotter.seperate_group(new_df, exp_col, status_col, day_col, time, temp_L_per, temp_H_per)
+    pval = kmplotter.log_rank(new_df, status_col, day_col)
+    print("Pval %s" % pval)
+    queue.put([float(pval), int(temp_L_per), int(temp_H_per)])
+
+def mp_get_logrank_beast_hper_lper(df, exp_col, status_col, day_col, time):
+    jobs = []
+    queue = multiprocessing.Queue()
+    for i in range(5, 100, 5):
+        temp_H_per = str(i)
+        temp_L_per = str(100 - i)
+        p = multiprocessing.Process(target=mp_get_log_rank_pval, args=(queue, df, exp_col, status_col, day_col, time, temp_L_per, temp_H_per))
+        jobs.append(p)
+        p.start()
+    
+    # 等待所有進程完成
+    for job in jobs:
+        job.join()
+
+    # 從 queue 中獲取進程返回的值
+    best_p_val = 1
+    while not queue.empty():
+        result = queue.get()
+        if float(result[0]) < best_p_val:
+            best_p_val = float(result[0])
+            L_per = str(result[1])
+            H_per = str(result[2])
+    return L_per, H_per
+
 class ChartView(APIView):
     def get(self, request, *args, **kwargs):
         resp_message = {
@@ -545,10 +576,6 @@ class ChartView(APIView):
 
             if time == "":
                 time = "0"
-            if L_per == "":
-                L_per = "0"
-            if H_per == "":
-                H_per = "0"
 
             print(cancer_category, cancer_type, meta_feature, mode, time, L_per, H_per)
 
@@ -561,18 +588,37 @@ class ChartView(APIView):
             elif mode == 'Disease-Specific':
                 mode = 'DSS'
 
-            # 因為直接Kmplotter()時會有cache問題，所以改用subprocess處理
+            mode = mode.upper()
+            exp_col = 'Expression'
+            status_col = mode
+            day_col = mode + '.time'
+            
+            # 因為直接Kmplotter()時會問題，所以改用subprocess處理
             path = os.path.abspath(os.path.dirname(__name__)) + os.sep
-            resp = json.loads(subprocess.check_output(
-                ['python', path + 'call_kmplotter.py', cancer_category, cancer_type, meta_feature, mode, time, L_per, H_per]).decode('utf-8'))
-
-            if resp["status"] != 'success':
-                raise Exception(resp["message"])
-            chart_data = json.loads(json.dumps(resp["data"]["chart_data"], cls = py.utils.PlotlyJSONEncoder))
+            
+            # auto select cutoff
+            kmplotter = Kmplotter()
+            if H_per == "" and L_per == "":
+                new_df = kmplotter.get_logrank_data(cancer_category, cancer_type, meta_feature, mode)
+                
+                L_per, H_per = mp_get_logrank_beast_hper_lper(new_df, exp_col, status_col, day_col, time)
+                
+            if L_per == "":
+                L_per = "0"
+            if H_per == "":
+                H_per = "0"
+            
+            resp = kmplotter.get(cancer_category, cancer_type, meta_feature, mode, time, L_per, H_per)
+            # print(resp)
+            # resp = json.loads(subprocess.check_output(['python', path + 'call_kmplotter.py', cancer_category, cancer_type, meta_feature, mode, time, L_per, H_per]).decode('utf-8'))
+            
+            chart_data = json.loads(json.dumps(resp["chart_data"], cls = py.utils.PlotlyJSONEncoder))
             
             resp_message["data"] = {
-                'chart_data': chart_data
-            }
+                'chart_data': chart_data,
+                'H_per': H_per,
+                'L_per': L_per,
+                }
 
         except Exception as e:
             resp_message["status"] = 'error'
@@ -750,7 +796,7 @@ class AftPlotDownloadView(APIView):
                 fh.read(), content_type="application/vnd.ms-excel")
             response['Content-Disposition'] = 'inline; filename=' + \
                 os.path.basename(download_dir + gene +"_"+survival_type+"_clnical.csv")
-            os.remove(download_dir + fname)
+            os.remove(download_dir + gene +"_"+survival_type+"_clnical.csv")
             return response
 
 
@@ -850,7 +896,8 @@ class TwoGeneView(APIView):
             group1 = request.GET['group1'].split(",")
             group2 = request.GET['group2'].split(",")
             #time = request.GET.get('time','0')
-
+            print("category1 %s, category2 %s, cancer_type %s, gene1 %s, gene2 %s, group1 %s, group1 %s"\
+                % (category1, category2, cancer_type, gene1, gene2, group1, group2))
             two_gene = TwoGene()
             data = {
                 "d": two_gene.get_data(category1, category2, gene1, gene2, cancer_type, group1, group2),
@@ -966,7 +1013,7 @@ class TwoGeneDownloadView(APIView):
                 fh.read(), content_type="application/vnd.ms-excel")
             response['Content-Disposition'] = 'inline; filename=' + \
                 os.path.basename(download_dir + mode+"_"+gene1+"_"+gene2+"_"+"logrank_two_gene.csv")
-            os.remove(download_dir + fname)
+            os.remove(download_dir + mode+"_"+gene1+"_"+gene2+"_"+"logrank_two_gene.csv")
             return response
 
 
@@ -1164,7 +1211,7 @@ class CoxTwoGeneDownloadView(APIView):
                 fh.read(), content_type="application/vnd.ms-excel")
             response['Content-Disposition'] = 'inline; filename=' + \
                 os.path.basename(download_dir + mode+"_"+gene1+"_"+gene2+"_"+"_two_gene_clinical.csv")
-            os.remove(download_dir + fname)
+            os.remove(download_dir + mode+"_"+gene1+"_"+gene2+"_"+"_two_gene_clinical.csv")
             return response
 
 
@@ -1328,7 +1375,7 @@ class MoreGeneDownloadView(APIView):
                 fh.read(), content_type="application/vnd.ms-excel")
             response['Content-Disposition'] = 'inline; filename=' + \
                 os.path.basename(download_dir + "more_gene.csv")
-            os.remove(download_dir + fname)
+            os.remove(download_dir + "more_gene.csv")
             return response
 
 class LogrankNameView(APIView):
@@ -1495,5 +1542,206 @@ def statistics(request):
 
 def faq(request):
     return render(request, 'faq.html', {
+        "path_info": request.META['PATH_INFO']
+    })
+
+from io import BytesIO
+
+class UpLoadSurvivalChartView(APIView):
+    def post(self, request, *args, **kwargs):
+        result = {
+            'status' : 'success'
+        }
+        try:
+            day_col = request.POST.get("day_col")
+            status_col = request.POST.get("status_col")
+            # expression_col_list = request.POST.getlist("expression_col_list")
+            expression_col = request.POST.get("gene_expression_col")
+            time = request.POST.get('time', "0")
+            L_per = request.POST.get('L_per', "0")
+            H_per = request.POST.get('H_per', "0")
+            print(day_col, status_col, expression_col, time, L_per, H_per)
+            file = request.FILES.get("file")
+            df = pd.read_csv(BytesIO(file.read()))[[expression_col, day_col, status_col]]
+        
+            print(df)
+            
+            # auto select cutoff
+            if H_per == "" and L_per == "":
+                L_per, H_per = mp_get_logrank_beast_hper_lper(df, expression_col, status_col, day_col, time)
+                
+            if L_per == "":
+                L_per = "0"
+            if H_per == "":
+                H_per = "0"
+
+            kmplotter = Kmplotter()
+            resp = kmplotter.get_mkpolt(df, expression_col, status_col, day_col, time, L_per, H_per)
+            
+            if resp["status"] != 'success':
+                raise Exception(resp["message"])
+            
+            result["data"] = {
+                'chart_data': resp["chart_data"],
+                'H_per': H_per,
+                'L_per': L_per,
+                }
+        except Exception as e:
+            result["status"] = "error"
+            result["message"] = str(e)
+            
+        return JsonResponse(result, safe=False)
+
+import math
+import base64
+
+from lifelines import CoxPHFitter
+from matplotlib import pyplot as plt
+from lifelines.statistics import proportional_hazard_test
+
+def cox_aft_plothtml(cox_aft, status_col, day_col, n):
+    cox_aft.plot()
+    # 轉成圖片的步驟
+    sio = BytesIO()
+
+    #plt.title('(n='+n+')')
+    plt.xlabel("log (Hazard Ratio) (95% CI)")
+    plt.title('Hazard Ratio Plot (status=%s, day=%s, n=%s)' % (status_col, day_col, n))
+    plt.savefig(sio, format='png', dpi=300, bbox_inches='tight')
+    data = base64.encodebytes(sio.getvalue()).decode()
+
+    html = '''
+        <img class="aftImg" src="data:image/png;base64,{}" />
+    '''.format(data)
+    plt.close()
+    return html
+
+class UpLoadSurvivalCoxView(APIView):
+    def post(self, request, *args, **kwargs):
+        result = {
+            'status' : 'success'
+        }
+        try:
+            day_col = request.POST.get("day_col")
+            status_col = request.POST.get("status_col")
+            expression_col_list = request.POST.getlist("expression_col_list")
+            # expression_col = request.POST.get("gene_expression_col")
+            
+            drop_image_columns = request.POST.getlist("drop_image_columns")
+            
+            print(day_col, status_col, expression_col_list, drop_image_columns)
+            file = request.FILES.get("file")
+            
+            
+            select_col = expression_col_list.copy()
+            select_col.append(day_col)
+            select_col.append(status_col)
+            
+            df = pd.read_csv(BytesIO(file.read()))[select_col]
+            df.drop(drop_image_columns, axis=1, inplace=True)
+            n = str(df.shape[0])
+            
+            cox = CoxPHFitter()
+            cox.fit(df, duration_col=day_col, event_col=status_col)
+            
+            summary_df = cox.summary
+            
+            html = cox_aft_plothtml(cox, status_col, day_col, n)
+
+            # PH assumption
+            results = proportional_hazard_test(cox, df, time_transform='rank')
+            # results.print_summary(decimals=3)
+            test_summary = results.__dict__
+            test_summary = json.loads(json.dumps(test_summary, cls = py.utils.PlotlyJSONEncoder))
+
+            # format and replace value
+            tmp_df = summary_df.to_dict('index')
+            for key, value in tmp_df.items():
+                value["p"] = format(value["p"], ".2E")
+                value["coef"] = format(value["coef"], ".2E")
+                if math.isinf(value["exp(coef) upper 95%"]):
+                    value["exp(coef) upper 95%"] = 1
+                tmp_df[key] = value
+
+            # result['data'] = [html, tmp_df, test_summary]
+            result['data'] = {}
+            result['data']["img"] = html
+            result['data']["summary"] = tmp_df
+            result['data']["test_summary"] = test_summary
+        except Exception as e:
+            result["status"] = "error"
+            result["message"] = str(e)
+        return JsonResponse(result, safe=False)
+
+from lifelines import LogNormalAFTFitter
+
+class UpLoadSurvivalAftView(APIView):
+    def post(self, request, *args, **kwargs):
+        result = {
+            'status' : 'success'
+        }
+        try:
+            day_col = request.POST.get("day_col")
+            status_col = request.POST.get("status_col")
+            expression_col_list = request.POST.getlist("expression_col_list")
+            # expression_col = request.POST.get("gene_expression_col")
+            
+            drop_image_columns = request.POST.getlist("drop_image_columns")
+            
+            print(day_col, status_col, expression_col_list, drop_image_columns)
+            file = request.FILES.get("file")
+            
+            
+            select_col = expression_col_list.copy()
+            select_col.append(day_col)
+            select_col.append(status_col)
+            
+            df = pd.read_csv(BytesIO(file.read()))[select_col]
+            df.drop(drop_image_columns, axis=1, inplace=True)
+            
+            aft = LogNormalAFTFitter()
+            
+            aft.fit(df, duration_col=day_col, event_col=status_col)
+
+            summary_df = aft.summary
+            
+            n = str(df.shape[0])
+            html = cox_aft_plothtml(aft, status_col, day_col, n)
+
+
+            tmp_df = {}
+            for index, row in summary_df.iterrows():
+                tmp = {}
+                for key, value in row.items():
+                    tmp[key] = value
+                    
+                tmp["p"] = format(tmp["p"], ".2E")
+                tmp["coef"] = format(tmp["coef"], ".2E")
+                tmp_df[index[1]] = tmp
+
+            result['data'] = {}
+            result['data']["img"] = html
+            result['data']["summary"] = tmp_df
+        except Exception as e:
+            result["status"] = "error"
+            result["message"] = str(e)
+        return JsonResponse(result, safe=False)
+
+class UpLoadGetColView(APIView):
+    def post(self, request, *args, **kwargs):
+        file = request.FILES['file']
+        df = pd.read_csv(BytesIO(file.read()))
+        col_list = list(df.columns)
+        data = {
+            'col': col_list,
+        }
+        result = {
+            "status": "success",
+            "data": data
+        }
+        return JsonResponse(result)
+        
+def upload_data(request):
+    return render(request, 'upload_data.html', {
         "path_info": request.META['PATH_INFO']
     })

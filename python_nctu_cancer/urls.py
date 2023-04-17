@@ -15,10 +15,9 @@ Including another URLconf
 """
 from django.views import static ##新增
 from django.conf import settings ##新增
-from django.conf.urls import url ##新增
+from django.urls import re_path
 from django.contrib import admin
 from django.urls import include, path
-from django.conf.urls import url
 
 from rest_framework.routers import DefaultRouter
 
@@ -34,6 +33,12 @@ urlpatterns = [
     path('tutorial', views.tutorial, name='tutorial'),
     path('statistics', views.statistics, name='statistics'),
     path('faq', views.faq, name='faq'),
+    path('upload_data', views.upload_data, name='upload_data'),
+    
+    path('api/upload_data_chart', views.UpLoadSurvivalChartView.as_view(), name='upload_data_chart'),
+    path('api/upload_data_cox', views.UpLoadSurvivalCoxView.as_view(), name='upload_data_cox'),
+    path('api/upload_data_aft', views.UpLoadSurvivalAftView.as_view(), name='upload_data_aft'),
+    path('api/upload_data_get_col', views.UpLoadGetColView.as_view(), name='upload_data_get_col'),
 
     path('admin/', admin.site.urls),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
@@ -69,6 +74,6 @@ urlpatterns = [
     path('api/more_gene/download', views.MoreGeneDownloadView.as_view(), name='more_gene_download'),
     path('api/get_category', views.GetCategory.as_view(), name='get_category'),
     
-    url(r'^static/(?P<path>.*)$', static.serve,
+    re_path(r'^static/(?P<path>.*)$', static.serve,
       {'document_root': settings.STATIC_ROOT}, name='static'),
 ]

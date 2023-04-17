@@ -7,3 +7,4 @@ test_*
 download/*
 uploads/*
 archive_1102.zip
+.env

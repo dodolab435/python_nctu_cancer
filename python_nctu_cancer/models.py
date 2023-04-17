@@ -77,7 +77,7 @@ class CancerLogRankModel():
             data = cur_coll.find(myquery).sort(
                 sort_column, sd).limit(limit).skip(skip)
             results = {
-                "total": data.count(),
+                "total": cur_coll.count_documents(myquery),
                 "data": data
             }
 
@@ -125,7 +125,7 @@ class CancerLogRankModel():
             data = cur_coll.find(myquery).sort(
                 sort_column, sd).limit(limit).skip(skip)
             results = {
-                "total": data.count(),
+                "total": cur_coll.count_documents(myquery),
                 "data": data
             }
         
@@ -178,7 +178,7 @@ class CancerAftDataModel():
             data = cur_coll.find(myquery).sort(
                 sort_column, sd).limit(limit).skip(skip)
             results = {
-                "total": data.count(),
+                "total": cur_coll.count_documents(myquery),
                 "data": data
             }
         return results
@@ -225,7 +225,7 @@ class CancerAftDataModel():
             data = cur_coll.find(myquery).sort(
                 sort_column, sd).limit(limit).skip(skip)
             results = {
-                "total": data.count(),
+                "total": cur_coll.count_documents(myquery),
                 "data": data
             }
         return results
@@ -282,7 +282,7 @@ class CancerCoxDataModel():
             data = cur_coll.find(myquery).sort(
                 sort_column, sd).limit(limit).skip(skip)
             results = {
-                "total": data.count(),
+                "total": cur_coll.count_documents(myquery),
                 "data": data
             }
         return results
@@ -328,7 +328,7 @@ class CancerCoxDataModel():
             data = cur_coll.find(myquery).sort(
                 sort_column, sd).limit(limit).skip(skip)
             results = {
-                "total": data.count(),
+                "total": cur_coll.count_documents(myquery),
                 "data": data
             }
         return results

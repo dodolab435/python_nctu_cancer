@@ -230,6 +230,8 @@ class MoreGene:
         return tmp_df
 
     def aft_img(self, df, sur, list, drop_image_columns):
+        print("sur: ",sur, "drop_image_columns: ", drop_image_columns)
+        print(df)
         drop_image_columns += ['Hybridization REF']
         df.rename(columns={"years_to_birth": "Age at diagnosis", "pathologic_stage": "Stage", "gender": 'Sex'},
                   inplace=True)
@@ -239,7 +241,8 @@ class MoreGene:
         df.drop(drop_image_columns, axis=1, inplace=True)
 
         aft = LogNormalAFTFitter()
-
+        
+        print(df)
         aft.fit(df, duration_col='days_' + sur, event_col=sur + '_status')
         aft.plot()
 

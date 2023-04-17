@@ -11,7 +11,12 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
 from pathlib import Path
+from dotenv import load_dotenv
+from os.path import join, dirname
 import os
+
+# load .env
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,13 +26,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '018ods#)g^3frkw6kq&-)wwwg94)jt9_ahe$0uud2&j(a&zk&0'
+# SECRET_KEY = '018ods#)g^3frkw6kq&-)wwwg94)jt9_ahe$0uud2&j(a&zk&0'
+SECRET_KEY = str(os.getenv('SECRET_KEY'))
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+# DEBUG = False
 # DEBUG = True
+DEBUG = os.getenv('DEBUG')
 
-ALLOWED_HOSTS = ['*',]
+# ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS').split(',')
 
 
 # Application definition
@@ -127,10 +135,10 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 CUSTOM_SETTINGS = {
     "MONGODB" : {
-        "db" : 'Wu_Sur',
-        "username" : 'haowei',
-        "password" : 'dodolabhaowei',
-        "address" : '140.113.120.221',
-        "port" : "21072",
+        "db" : os.getenv('DB_NAME'),
+        "username" : os.getenv('DB_USER'),
+        "password" : os.getenv('DB_PASSWORD'),
+        "address" : os.getenv('DB_HOST'),
+        "port" : os.getenv('DB_PORT'),
     }
 }

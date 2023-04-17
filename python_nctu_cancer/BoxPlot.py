@@ -91,5 +91,4 @@ class BoxPlot:
 
             result[type_name] = {
                 "normal": normal_expressions, "tumor": tumor_expressions}
-            print(result)
         return result

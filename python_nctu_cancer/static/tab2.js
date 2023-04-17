@@ -63,9 +63,6 @@ $(function () {
         showDataTable();
     })
 
-    // hide chart
-    $('.shiny-plot-output').hide();
-
     // search for the gene names when keying input up
     $('#gene1, #gene2').on("keyup", function() {
         let name = $.trim($(this).val());
@@ -406,33 +403,6 @@ function drawChart(mode, type, gene1, gene2, group1, group2, time) {
     }
 }
 
-function showChart() {
-    var $chart, $chartOption, divId;
-    var chartIndex = 0;
-
-    if (MY_DATA.chartJsonResult["chart_data"] && MY_DATA.chartJsonResult["chart_data"][0]["chart1_data"]) {
-        MY_DATA.chartJsonResult["chart_data"][0]["chart1_data"][0]["line"]["color"] = $('.chart-option-color1').eq(chartIndex).val();
-        MY_DATA.chartJsonResult["chart_data"][0]["chart1_data"][0]["line"]["width"] = $('.chart-option-width1').eq(chartIndex).val();
-        MY_DATA.chartJsonResult["chart_data"][0]["chart1_data"][1]["line"]["color"] = $('.chart-option-color2').eq(chartIndex).val();
-        MY_DATA.chartJsonResult["chart_data"][0]["chart1_data"][1]["line"]["width"] = $('.chart-option-width2').eq(chartIndex).val();
-        MY_DATA.chartJsonResult["chart_data"][0]["chart1_data"][2]["marker"]["color"] = $('.chart-option-marker-color1').eq(chartIndex).val();
-        MY_DATA.chartJsonResult["chart_data"][0]["chart1_data"][3]["marker"]["color"] = $('.chart-option-marker-color2').eq(chartIndex).val();
-    }
-    var chart1_data = MY_DATA.chartJsonResult["chart_data"][0].chart1_data;
-    var chart_layout = MY_DATA.chartJsonResult["chart_data"][0].layout;
-
-    divId = 'chart';
-    $chart = $('#chart');
-    $chartOption = $('#chart-option');
-
-    $chartOption.show();
-    $chart.html("").show();
-    Plotly.newPlot(divId, chart1_data, chart_layout || {});
-
-    var $download = '<div style="text-align:center; padding-bottom: 40px;"><a href="#" onclick="downloadTwoGene(\'' + MY_DATA.two_gene_options["mode"] + '\', \'' + MY_DATA.two_gene_options["type"] + '\', \'' + MY_DATA.two_gene_options["gene1"] + '\', \'' + MY_DATA.two_gene_options["gene2"] + '\', \'' + MY_DATA.two_gene_options["group1"] + '\', \'' + MY_DATA.two_gene_options["group2"] + '\')">Download clinical data</a></div>';
-    $chart.append($download);
-}
-
 /**
  * Drawing more gene's cox or aft chart
  * @param {*} mode 
@@ -445,7 +415,7 @@ function drawCoxTwoGeneChart(mode, type, gene1, gene2, tab, ignore) {
     var $chart, $chart2;
 
     $chart = $('#chart-cox');
-    $chart2 = $('#chart2');
+    $chart2 = $('#chart-cox-option');
 
     startLoading();
 
@@ -470,7 +440,9 @@ function drawCoxTwoGeneChart(mode, type, gene1, gene2, tab, ignore) {
             success: function (result, textStatus, jqXHR) {
                 if (result.status == "success") {
                     MY_DATA.chartData = result;
-                    showImgTable(mode, type, gene1, gene2, tab, $chart);
+                    console.log(result);
+                    // showImgTable(mode, type, gene1, gene2, tab, $chart);
+                    showImgTable($chart, tab);
 
                     if (ignore !== 1) {
                         _showSelectColumns($chart2);
@@ -488,32 +460,7 @@ function drawCoxTwoGeneChart(mode, type, gene1, gene2, tab, ignore) {
     }
 
     function _showSelectColumns($chartObj) {
-        let htmls = [], tmpKeys = [], key, i;
-
-        for (key in MY_DATA.chartData["data"]["summary"]) {
-            tmpKeys.push(key);
-        }
-        
-        htmls.push('<div>Remove features&emsp;');
-        for (i = 0; i < tmpKeys.length; i ++) {
-            if (tmpKeys[i] == "Intercept") {
-                continue;
-            }
-            htmls.push('<label><input type="checkbox" name="img_checkbox" value="' + tmpKeys[i] + '" checked="checked" /> ' + tmpKeys[i] + '</label>&emsp;');
-        }
-        htmls.push('<button class="btn btn-default btn-sm" type="button">Calculate</button>');
-        htmls.push('</div>');
-
-        // upload custom excel html
-        htmls.push('<div>');
-        htmls.push('<input type="file" name="upload_file" class="cox_aft_file" accept=".csv" style="display: none;" />');
-        htmls.push('<span class="temp_file_text"></span>');
-        htmls.push('<input type="button" class="select_file" value="Select file" />&emsp;');
-        htmls.push('<input type="button" class="csv_upload" value="Upload & reanalyze" />');
-        htmls.push('</div>');
-
-        $chartObj.show();
-        $chartObj.html(htmls.join(''));
+        _settingSelectColumns($chartObj);
 
         // listening event and redraw table
         $chartObj.find('.btn').on('click', function() {
@@ -526,14 +473,7 @@ function drawCoxTwoGeneChart(mode, type, gene1, gene2, tab, ignore) {
     
             drawCoxTwoGeneChart(mode, type, gene1, gene2, tab, 1);
         })
-        
-        // listening trigger file
-        $chartObj.find('.select_file').on('click', function() {
-            $chartObj.find('.cox_aft_file').trigger("click");
-        });
-        $chartObj.find('.cox_aft_file').on('change', function() {
-            $chartObj.find('.temp_file_text').html($(this).val());
-        });
+
         $chartObj.find('.csv_upload').on('click', function() { // do upload custom excel
             if ($chartObj.find('.cox_aft_file').val() == "") {
                 alert("Please select a file.");
@@ -567,7 +507,8 @@ function drawCoxTwoGeneChart(mode, type, gene1, gene2, tab, ignore) {
                     if (result.status == "success") {
                         MY_DATA.chartData = result;
                         var $chartUpload = $('#chart-upload');
-                        showImgTable(mode, type, gene1, gene2, tab, $chartUpload, 1);
+                        showImgTable($chartUpload, tab);
+                        addAftChartDownloadButton($chartUpload, mode, type, gene1, gene2, tab);
                     } else {
                         alert(result.message || "error");
                     }
@@ -577,84 +518,6 @@ function drawCoxTwoGeneChart(mode, type, gene1, gene2, tab, ignore) {
                 }
             });
         });
-    }
-}
-
-/**
- * Show cox or aft image's table
- */
-function showImgTable(mode, type, gene1, gene2, tab, $chart, hideDownload) {
-    let htmls = [], tmpKey, key, i, tmpName, tmpVal, j;
-
-    var summaries = [];
-    for (key in MY_DATA.chartData["data"]["summary"]) {
-        var tmpData = MY_DATA.chartData["data"]["summary"][key];
-        tmpData["_gene_name"] = key;
-        summaries.push(tmpData);
-    }
-
-    htmls.push('<div class="row">');
-    htmls.push('<div class="col-sm-7">' + MY_DATA.chartData["data"]["img"]);
-    htmls.push('</div>');
-    htmls.push('<div class="col-sm-5 img-table-container" style="margin-top: 20px;">');
-    if (summaries.length > 0) {
-        tmpName = "HR";
-        if (tab == "aft") {
-            tmpName = "TR";
-        }
-        htmls.push('<table class="table table-bordered">');
-        htmls.push('<tr align="center"><td scope="col"></td><td scope="col">' + tmpName + '</td><td scope="col">Confidence Interval</td>');
-        htmls.push('<td scope="col">P-val</td>');
-        if (MY_DATA.chartData["data"]["test_summary"]) {
-            htmls.push('<td scope="col">PH-assumption</td>');
-        }
-        htmls.push('</tr>');
-
-        summaries.sort(function(a, b) {
-            return parseFloat(a["p"]) - parseFloat(b["p"]);
-        });
-        
-        for (i = 0; i < summaries.length; i ++) {
-            tmpKey = summaries[i]["_gene_name"];
-            htmls.push('<tr align="center"><td>' + tmpKey + '</td><td>' + summaries[i]["exp(coef)"].toFixed(2) + '</td>');
-            htmls.push('<td>[' + summaries[i]["exp(coef) lower 95%"].toFixed(2) + ', ' + summaries[i]["exp(coef) upper 95%"].toFixed(2) + ']</td>');
-            if(parseFloat(summaries[i]["p"]) < 0.05) {
-                htmls.push('<td style="white-space: nowrap; color: red;">' + summaries[i]["p"] + '</td>');
-            }else{
-                htmls.push('<td style="white-space: nowrap;">' + summaries[i]["p"] + '</td>');
-            }
-            if (MY_DATA.chartData["data"]["test_summary"]) {
-                tmpVal = "";
-                for (j = 0; j < MY_DATA.chartData["data"]["test_summary"]["name"].length; j ++) {
-                    if (tmpKey == MY_DATA.chartData["data"]["test_summary"]["name"][j]) {
-                        tmpVal = MY_DATA.chartData["data"]["test_summary"]["p_value"][j];
-                        try {
-                            tmpVal = tmpVal.toFixed(2);
-                        } catch (ex) {
-                            tmpVal = 0;
-                        }
-                        if (tmpVal <= 0.05) {
-                            tmpVal = '<span style="color: red;">' + tmpVal + '</span>';
-                        }
-                        break;
-                    }
-                }
-                htmls.push('<td scope="col">' + tmpVal + '</td>');
-            }
-            htmls.push('</tr>');
-        }
-
-        htmls.push('</table>');
-    }
-    htmls.push('</div>');
-    htmls.push('</div>');
-
-    $chart.show();
-    $chart.html(htmls.join(''));
-
-    if (hideDownload != 1) {
-        var $download = '<div style="text-align:center; padding-bottom: 40px;"><a href="#" onclick="downloadCoxTwoGene(\'' + mode + '\', \'' + type + '\', \'' + gene1 + '\', \'' + gene2 + '\', \'' + tab + '\')">Download clinical data</a></div>';
-        $chart.append($download);
     }
 }
 
@@ -851,20 +714,32 @@ function downloadCoxTwoGene(mode, type, gene1, gene2, tab) {
     window.open(rootUrl + '/api/cox_two_gene/download?category1=' + MY_DATA.selectedCategory1 + '&category2=' + MY_DATA.selectedCategory2 + '&mode=' + mode + '&type=' + type + '&gene1=' + gene1 + '&gene2=' + gene2 + '&tab=' + tab);
 }
 
-function startLoading() {
-    if (MY_DATA.loadingFlag == 0) {
-        $("body").loading();
-        $('.loading-overlay-content').html('<img src="' + rootUrl + '/static/images/loading.gif" /> Loading...');
-    }
+// function startLoading() {
+//     if (MY_DATA.loadingFlag == 0) {
+//         $("body").loading();
+//         $('.loading-overlay-content').html('<img src="' + rootUrl + '/static/images/loading.gif" /> Loading...');
+//     }
 
-    MY_DATA.loadingFlag++;
+//     MY_DATA.loadingFlag++;
+// }
+
+// function stopLoading() {
+//     MY_DATA.loadingFlag--;
+
+//     if (MY_DATA.loadingFlag <= 0) {
+//         MY_DATA.loadingFlag = 0;
+//         $("body").loading("stop");
+//     }
+// }
+
+$(".chart-option-cutoff").attr('disabled', true);
+
+function addChartDownloadButton($chart){
+    var $download = '<div style="text-align:center; padding-bottom: 40px;"><a href="#" onclick="downloadTwoGene(\'' + MY_DATA.two_gene_options["mode"] + '\', \'' + MY_DATA.two_gene_options["type"] + '\', \'' + MY_DATA.two_gene_options["gene1"] + '\', \'' + MY_DATA.two_gene_options["gene2"] + '\', \'' + MY_DATA.two_gene_options["group1"] + '\', \'' + MY_DATA.two_gene_options["group2"] + '\')">Download clinical data</a></div>';
+    $chart.append($download);
 }
 
-function stopLoading() {
-    MY_DATA.loadingFlag--;
-
-    if (MY_DATA.loadingFlag <= 0) {
-        MY_DATA.loadingFlag = 0;
-        $("body").loading("stop");
-    }
+function addAftChartDownloadButton($chart, mode, type, gene1, gene2, tab){
+    var $download = '<div style="text-align:center; padding-bottom: 40px;"><a href="#" onclick="downloadCoxTwoGene(\'' + mode + '\', \'' + type + '\', \'' + gene1 + '\', \'' + gene2 + '\', \'' + tab + '\')">Download clinical data</a></div>';
+    $chart.append($download);
 }
