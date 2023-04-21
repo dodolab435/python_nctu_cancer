@@ -74,6 +74,8 @@ urlpatterns = [
     path('api/more_gene/download', views.MoreGeneDownloadView.as_view(), name='more_gene_download'),
     path('api/get_category', views.GetCategory.as_view(), name='get_category'),
     
+    path('api/test', views.TestView.as_view(), name='api_test'),
+    
     re_path(r'^static/(?P<path>.*)$', static.serve,
       {'document_root': settings.STATIC_ROOT}, name='static'),
 ]

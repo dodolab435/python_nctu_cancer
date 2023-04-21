@@ -1745,3 +1745,14 @@ def upload_data(request):
     return render(request, 'upload_data.html', {
         "path_info": request.META['PATH_INFO']
     })
+
+class TestView(APIView):
+    def post(self, request, *args, **kwargs):
+        result = {
+            'status' : 'success'
+        }
+        cancer_type = request.POST.get("cancer_type")
+        category = request.POST.get("category")
+        gene = request.POST.get("gene")
+        result['data'] = NewAft().test(cancer_type, category, gene)
+        return JsonResponse(result)

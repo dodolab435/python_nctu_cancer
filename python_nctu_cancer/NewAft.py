@@ -59,8 +59,10 @@ class NewAft:
 
         myquery = {}
         myquery["type"] = type
-        myquery["MetaFeature"] = {
-            "$regex": f"(^{meta_feature}([;|,]))|^({meta_feature})$"}
+        # myquery["MetaFeature"] = {
+        #     "$regex": f"(^{meta_feature}([;|,]))|^({meta_feature})$"}
+        myquery["MetaFeature"] = meta_feature
+        
         if cgcite != "":
             myquery["Cgcite"] = cgcite
 
@@ -589,3 +591,39 @@ class NewAft:
             print(e)
 
         return val
+
+    def test(self, type, category, gene):
+        mongo_col = self.mongodb_conn["cancer_genome_" + category]
+        myquery = {
+            'type': type
+        }
+        if category == "lncrna":
+            myquery["gene_symbol"] = gene
+        else:
+            # myquery["MetaFeature"] = gene
+            myquery["MetaFeature"] = {"$regex": f"(^{gene}([;|,]))|^({gene})$"}
+            # myquery["MetaFeature"] = {
+            #         "$regex": f"(^{gene}(;|\\|))|^({gene})$|(;[\s]*{gene}$)"}
+
+        data = list(mongo_col.find(
+            myquery, {'_id': False, 'category': False, 'type': False}))
+
+        json_data = {}
+        list_name = []
+        # Forcing change MetaFeature value
+        for i, d in enumerate(data):
+            print(data[i]["MetaFeature"])
+            list_name.append(data[i]["MetaFeature"])
+            # break
+            # for k in data[i]:
+            #     # if k not in ["MetaFeature"]:
+            #     #     continue
+            #     val = data[i][k]
+            #     # if val.find("|") != -1:
+            #     #     val = val.split("|")[0]
+            #     # elif val.find(",") != -1:
+            #     #     val = val.split(",")[0]
+            #     data[i][k] = val
+
+        # data2 = pd.DataFrame(data).to_json()
+        return list_name

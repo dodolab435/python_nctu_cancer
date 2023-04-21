@@ -1175,24 +1175,6 @@ function drawCorrelationChart(data) {
     }
 }
 
-// function startLoading() {
-//     if (MY_DATA.loadingFlag == 0) {
-//         $("body").loading();
-//         $('.loading-overlay-content').html('<img src="' + rootUrl + '/static/images/loading.gif" /> Loading...');
-//     }
-
-//     MY_DATA.loadingFlag++;
-// }
-
-// function stopLoading() {
-//     MY_DATA.loadingFlag--;
-
-//     if (MY_DATA.loadingFlag <= 0) {
-//         MY_DATA.loadingFlag = 0;
-//         $("body").loading("stop");
-//     }
-// }
-
 function startModalLoading() {
     if (MY_DATA.loadingModalFlag == 0) {
         $(".modal").loading();
@@ -1210,11 +1192,3 @@ function stopModalLoading() {
         $(".modal").loading("stop");
     }
 }
-
-// function downloadChart(category, type, feature, mode, L_per, H_per) {
-//     window.open(rootUrl + '/api/chart/download?category=' + category + '&type=' + type + '&feature=' + feature + '&mode=' + mode + '&L_per=' + L_per + '&H_per=' + H_per);
-// }
-
-// function downloadAftPlot(category, type, feature, cgcite, survivalType) {
-//     window.open(rootUrl + '/api/aftplot/download?category=' + category + '&type=' + type + '&feature=' + feature + '&cgcite=' + cgcite + '&survival_type=' + survivalType);
-// }
