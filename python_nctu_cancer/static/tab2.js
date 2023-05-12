@@ -1,5 +1,8 @@
 
 $(function () {
+    $("label[name='group_1']").html("1");
+    $("label[name='group_2']").html("2");
+
     // disable dataTable's warning
     $.fn.dataTable.ext.errMode = 'none';
 
@@ -447,6 +450,7 @@ function drawCoxTwoGeneChart(mode, type, gene1, gene2, tab, ignore) {
                     if (ignore !== 1) {
                         _showSelectColumns($chart2);
                     }
+                    addAftChartDownloadButton($chart2, mode, type, gene1, gene2, tab);
                 } else {
                     alert(result.message || "error");
                 }

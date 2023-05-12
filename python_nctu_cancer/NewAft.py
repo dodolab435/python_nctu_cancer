@@ -16,6 +16,7 @@ import plotly as py
 import pymongo
 import os
 import json
+import math
 import base64
 import matplotlib as plt
 import statistics
@@ -78,79 +79,30 @@ class NewAft:
         df1 = df1[df1[gene] != '']
         return df1
 
-    def aft_img(self, df, survival_type, gene, drop_image_columns, cancer_type):
-        df.rename(columns={'years_to_birth': 'Age at diagnosis', 'pathologic_stage': 'Stage', 'gender': 'Sex',
-                           'Expression': gene}, inplace=True)
-
-        df = self.drop_nan(df, gene)
-        df.drop(drop_image_columns, axis=1, inplace=True)
-        n = str(df.shape[0])
-        aft = LogNormalAFTFitter()
-
-        aft.fit(df, duration_col='days_'+survival_type.upper(),
-                event_col=survival_type.upper() + '_status')
-        aft.plot()
-        summary_df = aft.summary
-
-        sio = BytesIO()
-
-        #plt.title(gene+' (n='+n+')')
-        plt.xlabel("log (Time Ratio) (95% CI)")
-        if cancer_type != 'None':
-            plt.title(cancer_type + ', Time Ratio Plot ' +
-                      '(' + survival_type + ', ' + 'n=' + n + ')')
-        else:
-            plt.title('Time Ratio Plot ' +
-                      '(' + survival_type + ', ' + 'n=' + n + ')')
-        plt.savefig(sio, format='png', dpi=300, bbox_inches='tight')
-        data = base64.encodebytes(sio.getvalue()).decode()
-
-        html = '''
-            <img class="aftImg" src="data:image/png;base64,{}" />
-        '''.format(data)
-        plt.close()
-
-        tmp_df = {}
-        for index, row in summary_df.iterrows():
-            tmp = {}
-            for key, value in row.items():
-                tmp[key] = value
-
-            tmp["p"] = format(tmp["p"], ".2E")
-            tmp_df[index[1]] = tmp
-
-        return [html, tmp_df]
-
-    def cox_img(self, df, survival_type, gene, drop_image_columns, cancer_type):
+    def database_df_preproc(self, df, gene, drop_image_columns):
         df.rename(columns={'years_to_birth': 'Age at diagnosis',
                   'pathologic_stage': 'Stage', 'gender': 'Sex', 'Expression': gene}, inplace=True)
         df = self.drop_nan(df, gene)
         df.drop(drop_image_columns, axis=1, inplace=True)
+        return df
+    
+    def aft_cox_img(self, tab, df, duration_col, event_col, plt_title):
+        if tab == "cox":
+            fitter = CoxPHFitter()
+        else:
+            fitter = LogNormalAFTFitter()
 
-        n = str(df.shape[0])
-        cox = CoxPHFitter()
-
-        cox.fit(df, duration_col='days_' + survival_type.upper(),
-                event_col=survival_type.upper() + '_status')
-        cox.plot()
-        summary_df = cox.summary
-
-        # print(summary_df['exp(coef) lower 95%'])
-        # print(summary_df['exp(coef) upper 95%'])
-        # print(summary_df['p'])
-        # plt.show()
+        fitter.fit(df, duration_col=duration_col,
+                event_col=event_col)
+        fitter.plot()
+        summary_df = fitter.summary
 
         # 轉成圖片的步驟
         sio = BytesIO()
 
         #plt.title(gene+' (n='+n+')')
         plt.xlabel("log (Hazard Ratio) (95% CI)")
-        if cancer_type != 'None':
-            plt.title(cancer_type + ', Hazard Ratio Plot ' +
-                      '(' + survival_type + ', ' + 'n=' + n + ')')
-        else:
-            plt.title('Hazard Ratio Plot ' +
-                      '(' + survival_type + ', ' + 'n=' + n + ')')
+        plt.title(plt_title)
         plt.savefig(sio, format='png', dpi=300, bbox_inches='tight')
         data = base64.encodebytes(sio.getvalue()).decode()
 
@@ -159,29 +111,37 @@ class NewAft:
         '''.format(data)
         plt.close()
 
-        # PH assumption
-        results = proportional_hazard_test(cox, df, time_transform='rank')
-        # results.print_summary(decimals=3)
-        test_summary = results.__dict__
-        test_summary = json.loads(json.dumps(
-            test_summary, cls=py.utils.PlotlyJSONEncoder))
-
-        # format and replace value
         tmp_df = summary_df.to_dict('index')
         for key, value in tmp_df.items():
             value["p"] = format(value["p"], ".2E")
-            if value["exp(coef) upper 95%"] == float("inf"):
-                value["exp(coef) upper 95%"] = 0
-            tmp_df[key] = value
-
-        return [html, tmp_df, test_summary]
-
+            value["coef"] = format(value["coef"], ".2E")
+            for k in ["exp(coef)", "exp(coef) lower 95%", "exp(coef) upper 95%"]:
+                if math.isinf(float(value[k])):
+                    value[k] = str(value[k])
+                elif value[k] >= 100:
+                    value[k] = format(value[k], ".2E")
+                else:
+                    value[k] = format(value[k], ".2f")
+        
+        if tab == "cox":
+            # PH assumption
+            results = proportional_hazard_test(fitter, df, time_transform='rank')
+            # results.print_summary(decimals=3)
+            test_summary = results.__dict__
+            test_summary = json.loads(json.dumps(test_summary, cls=py.utils.PlotlyJSONEncoder))
+            return [html, tmp_df, test_summary]
+        else:
+            return [html, tmp_df]
+    
     def get_patient(self, cancer_type, dic, survival_type, meta_feature):
         # 取得指定存在檔案路徑
         target_path = self.path + "Cox_parsedata" + os.sep
         target_path += survival_type.upper() + "_parsedata" + os.sep
         cox_path = self.get_cox_path(target_path, cancer_type + "output.txt")
-
+        
+        if cox_path is None:
+            raise Exception("No results for the selected item.")
+        
         # 依照不同類別呈現不同
         x_value = 0
         y_value = 0
@@ -243,7 +203,10 @@ class NewAft:
         target_path = self.path + "Cox_parsedata" + os.sep
         target_path += survival_type.upper() + "_parsedata" + os.sep
         cox_path = self.get_cox_path(target_path, cancer_type + "output.txt")
-
+        
+        if cox_path is None:
+            raise Exception("No results for the selected item.")
+        
         # 依照不同類別呈現不同
         x_value = 0
         y_value = 0
@@ -378,10 +341,8 @@ class NewAft:
         dic = dict(zip(a, b))
         return dic[metafeature]
 
-    def get_cox_img_data(self, category, cancer_type, meta_feature, cgcite, survival_type, drop_image_columns):
-
-        list_genome = self.get_genome_by_metafeature(
-            category, cancer_type, meta_feature, cgcite)
+    def get_database_data(self, category, cancer_type, meta_feature, cgcite, survival_type, drop_image_columns):
+        list_genome = self.get_genome_by_metafeature(category, cancer_type, meta_feature, cgcite)
         list_columns = []
         list_values = []
         for group_dataset in list_genome:
@@ -410,174 +371,24 @@ class NewAft:
             gene = gene.split(";")[0]
         elif 'methylation' in category:
             gene = cgcite
+        
+        df1 = self.database_df_preproc(df1, gene, drop_image_columns)
+        
+        return df1
+    
+    def get_aft_cox_img_data(self, tab, category, cancer_type, meta_feature, cgcite, survival_type, drop_image_columns):
+        df1 = self.get_database_data(category, cancer_type, meta_feature, cgcite, survival_type, drop_image_columns)
+        
+        n = str(df1.shape[0])
+        if cancer_type != 'None':
+            plt_title = cancer_type + ', Time Ratio Plot ' + '(' + survival_type + ', ' + 'n=' + n + ')'
+        else:
+            plt_title = 'Time Ratio Plot ' + '(' + survival_type + ', ' + 'n=' + n + ')'
 
-        cox_data = self.cox_img(df1, survival_type, gene,
-                                drop_image_columns, cancer_type)
-
-        return cox_data
-
-    def get_aft_img_data(self, category, cancer_type, meta_feature, cgcite, survival_type, drop_image_columns):
-
-        list_genome = self.get_genome_by_metafeature(
-            category, cancer_type, meta_feature, cgcite)
-        list_columns = []
-        list_values = []
-        for group_dataset in list_genome:
-            for col in group_dataset:
-                if col.lower() in ["cgcite", "type"]:
-                    continue
-                try:
-                    list_values.append(float(group_dataset[col]))
-                    list_columns.append(col)
-                except Exception as err:
-                    print(err)
-            break
-
-        dic = dict(zip(list_columns, list_values))
-
-        df1 = self.count(cancer_type, dic, survival_type)
-
-        gene = meta_feature
-        if category == 'lncrna':
-            gene = self.get_gene(gene)
-        elif 'methylation' in category:
-            gene = cgcite
-        if gene.find("|") != -1:
-            gene = gene.split("|")[0]
-        elif gene.find(",") != -1:
-            gene = gene.split(",")[0]
-        elif gene.find(";") != -1:
-            gene = gene.split(";")[0]
-
-        aft_data = self.aft_img(df1, survival_type, gene,
-                                drop_image_columns, cancer_type)
-
-        return aft_data
-
-    def get_cox_upload_img_data(self, category, cancer_type, meta_feature, cgcite, survival_type, upload_file):
-        try:
-            list_genome = self.get_genome_by_metafeature(
-                category, cancer_type, meta_feature, cgcite)
-            list_columns = []
-            list_values = []
-            for group_dataset in list_genome:
-                for col in group_dataset:
-                    if col.lower() in ["cgcite", "type"]:
-                        continue
-                    try:
-                        list_values.append(float(group_dataset[col]))
-                        list_columns.append(col)
-                    except Exception as err:
-                        print(err)
-                break
-
-            df1 = pd.read_csv(upload_file, delimiter=',')
-            df1.to_csv(index=False)
-
-            # drop what the extra added columns
-            df_len = len(df1.columns)
-            if df_len < 21:
-                raise Exception("File columns lack of some titles")
-            drop_indexes = []
-            for i in range(df_len - 20, df_len):
-                drop_indexes.append(i)
-            df1.drop(df1.columns[drop_indexes],axis=1,inplace=True)
-
-            cancer_type = 'None'
-            # if 'days_' + survival_type.upper() not in df1.columns:
-            #     raise Exception('The uploaded file must have the same survival type as the selected survival type.')
-
-            csv_meta_feature = list(df1.columns)[-1]
-            # because downloaded data changed
-            df1.rename(columns={csv_meta_feature: 'Expression'}, inplace=True)
-
-            gene = csv_meta_feature
-            if gene.find("|") != -1:
-                gene = gene.split("|")[0]
-            elif gene.find(",") != -1:
-                gene = gene.split(",")[0]
-            elif gene.find(";") != -1:
-                gene = gene.split(";")[0]
-
-            df1.drop(['Patient ID'], axis=1, inplace=True)
-            if np.std(df1['pathologic_stage']) == 0.0:
-                df1.drop(['pathologic_stage'], axis=1, inplace=True)
-            if np.std(df1['gender']) == 0.0:
-                df1.drop(['gender'], axis=1, inplace=True)
-
-            cox_data = self.cox_img(df1, survival_type, gene, [], cancer_type)
-        except Exception as e:
-            if str(e) in ["'days_OS'", "'days_DSS'", "'days_DFI'", "'days_PFI'"]:
-                raise Exception(
-                    'The uploaded file must have the same survival type as the selected survival type.')
-            else:
-                raise Exception(
-                    "The uploaded file must have all the features (columns) downloaded from the same webpage.")
-
-        return cox_data
-
-    def get_aft_upload_img_data(self, category, cancer_type, meta_feature, cgcite, survival_type, upload_file):
-        try:
-            list_genome = self.get_genome_by_metafeature(
-                category, cancer_type, meta_feature, cgcite)
-            list_columns = []
-            list_values = []
-            for group_dataset in list_genome:
-                for col in group_dataset:
-                    if col.lower() in ["cgcite", "type"]:
-                        continue
-                    try:
-                        list_values.append(float(group_dataset[col]))
-                        list_columns.append(col)
-                    except Exception as err:
-                        print(err)
-                break
-
-            df1 = pd.read_csv(upload_file, delimiter=',')
-            df1.to_csv(index=False)
-
-            # drop what the extra added columns
-            df_len = len(df1.columns)
-            if df_len < 21:
-                raise Exception("File columns lack of some titles")
-            drop_indexes = []
-            for i in range(df_len - 20, df_len):
-                drop_indexes.append(i)
-            df1.drop(df1.columns[drop_indexes],axis=1,inplace=True)
-            
-            csv_meta_feature = list(df1.columns)[-1]
-            # because downloaded data changed
-            df1.rename(columns={csv_meta_feature: 'Expression'}, inplace=True)
-
-            gene = csv_meta_feature
-            if gene.find("|") != -1:
-                gene = gene.split("|")[0]
-            elif gene.find(",") != -1:
-                gene = gene.split(",")[0]
-            elif gene.find(";") != -1:
-                gene = gene.split(";")[0]
-
-            df1.drop(['Patient ID'], axis=1, inplace=True)
-            if np.std(df1['pathologic_stage']) == 0.0:
-                df1.drop(['pathologic_stage'], axis=1, inplace=True)
-            if np.std(df1['gender']) == 0.0:
-                df1.drop(['gender'], axis=1, inplace=True)
-            cancer_type = 'None'
-            # if 'days_' + survival_type.upper() not in df1.columns:
-            #     raise Exception('The uploaded file must have the same survival type as the selected survival type.')
-
-            aft_data = self.aft_img(df1, survival_type, gene, [], cancer_type)
-
-        except Exception as e:
-            if str(e) in ["'days_OS'", "'days_DSS'", "'days_DFI'", "'days_PFI'"]:
-                raise Exception(
-                    'The uploaded file must have the same survival type as the selected survival type.')
-            else:
-                raise Exception(
-                    "The uploaded file must have all the features (columns) downloaded from the same webpage.")
-
-        return aft_data
-
+        aft_cox_data = self.aft_cox_img(tab, df1, 'days_' + survival_type.upper(),survival_type.upper() + '_status', plt_title)
+        return aft_cox_data
+        
+        
     def format_val(self, data, a, b):
         val = ""
 

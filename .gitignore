@@ -6,5 +6,6 @@ __init__.py
 test_*
 download/*
 uploads/*
+log/*
 archive_1102.zip
 .env

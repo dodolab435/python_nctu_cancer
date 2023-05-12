@@ -1,5 +1,7 @@
 
 $(function () {
+    $("label[name='group_1']").html("1");
+    $("label[name='group_2']").html("2");
     // disable dataTable's warning
     $.fn.dataTable.ext.errMode = 'none';
 
@@ -204,7 +206,17 @@ function listenDataTableEvent($table, dataTable, category, type, tab) {
         case "aft":
         case "cox":
             $table.find("tbody").on("click", "tr", function () {
-                var mode = dataTable.row(this).data()[0];
+                var survivalType = dataTable.row(this).data()[0];
+                var tmpMapping = {
+                    "Overall": "OS",
+                    "Progression-Free": "PFI",
+                    "Disease-Free": "DFI",
+                    "Disease-Specific": "DSS",
+                }
+                var mode = "os";
+                if (typeof tmpMapping[survivalType] != "undefined") {
+                    mode = tmpMapping[survivalType];
+                }
                 MY_DATA.drop_image_columns = [];
                 drawMoreGeneChart(mode);
             })
@@ -380,8 +392,8 @@ function getColumns(category, type, subTab) {
 function drawMoreGeneChart(mode, ignore) {
     let dataParams = MY_DATA.selectedData, $chart, $chart2;
     
-    $chart = $('#chart');
-    $chart2 = $('#chart2');
+    $chart = $('#chart-cox');
+    $chart2 = $('#chart-cox-option');
     dataParams["mode"] = mode;
     dataParams["drop_image_columns"] = MY_DATA.drop_image_columns;
 
@@ -404,6 +416,7 @@ function drawMoreGeneChart(mode, ignore) {
                     if (ignore !== 1) {
                         _showSelectColumns($chart2);
                     }
+                    addAftChartDownloadButton($chart2, mode)
                 } else {
                     alert(result.message || "error");
                 }
@@ -506,24 +519,6 @@ function downloadMoreGene(mode) {
     }
     $('#downloadForm').submit();
 }
-
-// function startLoading() {
-//     if (MY_DATA.loadingFlag == 0) {
-//         $("body").loading();
-//         $('.loading-overlay-content').html('<img src="' + rootUrl + '/static/images/loading.gif" /> Loading...');
-//     }
-
-//     MY_DATA.loadingFlag++;
-// }
-
-// function stopLoading() {
-//     MY_DATA.loadingFlag--;
-
-//     if (MY_DATA.loadingFlag <= 0) {
-//         MY_DATA.loadingFlag = 0;
-//         $("body").loading("stop");
-//     }
-// }
 
 function addAftChartDownloadButton($chart, mode){
     var $download = '<div style="text-align:center; padding-bottom: 40px;"><a href="#" onclick="downloadMoreGene(\'' + mode + '\')">Download clinical data</a></div>';

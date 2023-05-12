@@ -29,7 +29,7 @@ const_layout = {
         "anchor": "y1",
     },
     "yaxis1": {
-        "title": 'Probability of Survival',
+        "title": 'Probability of survival',
         "anchor": "x1",
         "range": [
             0,
@@ -37,7 +37,7 @@ const_layout = {
         ],
     },
     "yaxis2": {
-        "title": 'Sample num',
+        "title": 'Number of patients',
         "anchor": "x2",
     },
     "titlefont": {

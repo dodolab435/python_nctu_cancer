@@ -68,20 +68,6 @@ $(function () {
     $('body').on('click', function() {
         $('.search-result').hide();
     })
-
-    // KMplot submit
-    // $("[name='chgChartTime']").click(function () {
-    //     var category, time;
-    //     isModal = $(this).parent().parent().prevAll("[name='isModal']").val();
-    //     if (isModal == 'true') {
-    //         category = MY_DATA.modalCategory;
-    //     } else {
-    //         category = MY_DATA.selectedCategory;
-    //     }
-    //     time = $(this).siblings("[name='chart-time']").val();
-    //     console.log("time: " + time, "category: " + category);
-    //     drawChart(MY_DATA.selectedSurvivalType, category, time);
-    // });
 })
 
 function fillOption() {
@@ -181,107 +167,6 @@ function showDataTable() {
 
     // listen dataTable's event
     listenDataTableEvent($table, dataTable, MY_DATA.selectedCategory, MY_DATA.selectedCancerType, MY_DATA.selectedTab);
-}
-
-/**
- * show modal's DataTable
- * @param {*} e 
- * @param {*} category 
- * @param {*} gene 
- * @returns 
- */
-function showModal(e, category, gene, entrez) {
-    e.stopPropagation();
-
-    MY_DATA.modalCategory = category;
-    MY_DATA.modalCancerType = MY_DATA.selectedCancerType;
-    MY_DATA.modalTab = "logrank";
-    MY_DATA.entrez = entrez;
-    $('#tbl-browse-modal').modal("show");
-
-    if (category == "methylation27k") {
-        $('#tbl-browse-modal .modal-title').text('methylation 27k');
-    } else {
-        $('#tbl-browse-modal .modal-title').text('methylation 450k');
-    }
-
-    // reset tab
-    $('#nav-browse-modal li').removeClass("active").eq(0).addClass("active");
-    MY_DATA.modalTab = 'logrank';
-
-    showModalDataTable();
-
-    // tab click event
-    $("#nav-browse-modal li").unbind("click").on('click', function () {
-        MY_DATA.modalTab = $(this).find('a').data("value");
-
-        $(this).siblings("li").removeClass("active");
-        $(this).addClass("active");
-
-        // show or hide survival type
-        if (MY_DATA.modalTab == "expression") {
-            $(this).parent().next(".tab-content").find('.survival_type').hide();
-        } else {
-            $(this).parent().next(".tab-content").find('.survival_type').show();
-        }
-
-        showModalDataTable();
-    })
-}
-
-function showModalDataTable() {
-    var url;
-
-    switch (MY_DATA.modalTab) {
-        case "logrank":
-            url = rootUrl + '/api/logrank';
-            break;
-        case "aft":
-            url = rootUrl + '/api/aftdata';
-            break;
-        case "cox":
-            url = rootUrl + '/api/coxdata';
-            break;
-        case "expression":
-            url = rootUrl + '/api/logrank';
-            break;
-        default:
-            return;
-    }
-
-    var $table = $('<table class="display" width="100%"></table>');
-
-    $('.datatable-modal-box').html("").append($table);
-
-    var dataTable = $table.DataTable({
-        sAjaxSource: url,
-        fnServerData: function (sSource, aoData, fnCallback) {
-            /* Add some extra data to the sender */
-            if (MY_DATA.modalTab == "expression") {
-                aoData.push({ "name": "search_correlation", "value": 1 });
-            }
-            aoData.push({ "name": "sub_tab", "value": MY_DATA.modalTab });
-            retrieveModalData(sSource, aoData, fnCallback);
-        },
-        searching: false,
-        processing: true,
-        serverSide: true,
-        bPaginate: true,
-        ordering: false,
-        sPaginationType: "full_numbers",
-        columns: getColumns(MY_DATA.modalCategory, MY_DATA.modalCancerType, MY_DATA.modalTab),
-        order: getOrder(MY_DATA.modalCategory, MY_DATA.modalCancerType, MY_DATA.modalTab), // default order
-        rowCallback: function (row, data) {
-            showRowWarning(row, data, MY_DATA.modalCategory, MY_DATA.modalCancerType, MY_DATA.modalTab);
-        },
-        dom: 'Bfrtip',
-        buttons: [
-            'copy', 'csv', 'excel', 'pdf', 'print'
-        ],
-    });
-
-    // listen dataTable's event
-    listenDataTableEvent($table, dataTable, MY_DATA.modalCategory, MY_DATA.modalCancerType, MY_DATA.modalTab);
 }
 
 /**
@@ -801,6 +686,7 @@ function getColumns(category, selectedType, subTab) {
                     data.push({
                         title: "",
                         render: function (data, type, row, meta) {
+                            var tmpFeatures = row[1].split("|");
                             return '<input type="button" value="27k" class="methylation-btn" onclick="showModal(event, \'methylation27k\', \'' + row[0] + '\', \'' + row[1] + '\')" />';
                         }
                     });
@@ -808,6 +694,7 @@ function getColumns(category, selectedType, subTab) {
                 data.push({
                     title: "",
                     render: function (data, type, row, meta) {
+                        var tmpFeatures = row[1].split("|");
                         return '<input type="button" value="450k" class="methylation-btn" onclick="showModal(event, \'methylation450k\', \'' + row[0] + '\', \'' + row[1] + '\')" />';
                     }
                 });
@@ -1037,74 +924,74 @@ function getCallbackData(data, category, type, subTab) {
  * Show current expression's custom table, prepare to click button and show correlation chart
  * @param {*} result
  */
-function showCustomExpressionTable(result) {
-    var htmls = [], i, val1, val2, val3, val4;
+// function showCustomExpressionTable(result) {
+//     var htmls = [], i, val1, val2, val3, val4;
 
-    htmls.push('<div>');
-    htmls.push('<table class="correlationTable">');
-    htmls.push('<tr>');
-    htmls.push('<th></th>');
-    htmls.push('<th>Cgsite</th>');
-    htmls.push('<th>Pearson cor</th>');
-    htmls.push('<th>Pearson P-val</th>');
-    htmls.push('<th>Spearman cor</th>');
-    htmls.push('<th>Spearman P-val</th>');
-    htmls.push('</tr>')
-    for (i = 0; i < result["d"].length; i++) {
-        val1 = "";
-        val2 = "";
-        val3 = "";
-        val4 = "";
-        if (typeof result["correlations"][i] != "undefined" && result["correlations"][i] != "") {
-            val1 = result["correlations"][i][0];
-            val2 = result["correlations"][i][1];
-            val3 = result["correlations"][i][2];
-            val4 = result["correlations"][i][3];
-        }
+//     htmls.push('<div>');
+//     htmls.push('<table class="correlationTable">');
+//     htmls.push('<tr>');
+//     htmls.push('<th></th>');
+//     htmls.push('<th>Cgsite</th>');
+//     htmls.push('<th>Pearson cor</th>');
+//     htmls.push('<th>Pearson P-val</th>');
+//     htmls.push('<th>Spearman cor</th>');
+//     htmls.push('<th>Spearman P-val</th>');
+//     htmls.push('</tr>')
+//     for (i = 0; i < result["d"].length; i++) {
+//         val1 = "";
+//         val2 = "";
+//         val3 = "";
+//         val4 = "";
+//         if (typeof result["correlations"][i] != "undefined" && result["correlations"][i] != "") {
+//             val1 = result["correlations"][i][0];
+//             val2 = result["correlations"][i][1];
+//             val3 = result["correlations"][i][2];
+//             val4 = result["correlations"][i][3];
+//         }
 
-        htmls.push('<tr>');
-        htmls.push('<td><input type="checkbox" /></td>');
-        htmls.push('<td>' + result["d"][i]["Cgcite"] + '</td>');
-        htmls.push('<td>' + val1 + '</td>');
-        htmls.push('<td>' + val2 + '</td>');
-        htmls.push('<td>' + val3 + '</td>');
-        htmls.push('<td>' + val4 + '</td>');
-        htmls.push('</tr>')
-    }
-    htmls.push('</table>');
+//         htmls.push('<tr>');
+//         htmls.push('<td><input type="checkbox" /></td>');
+//         htmls.push('<td>' + result["d"][i]["Cgcite"] + '</td>');
+//         htmls.push('<td>' + val1 + '</td>');
+//         htmls.push('<td>' + val2 + '</td>');
+//         htmls.push('<td>' + val3 + '</td>');
+//         htmls.push('<td>' + val4 + '</td>');
+//         htmls.push('</tr>')
+//     }
+//     htmls.push('</table>');
 
-    htmls.push('<div><input type="button" class="correlation-btn" value="Start" /></div>');
-    htmls.push('</div>');
+//     htmls.push('<div><input type="button" class="correlation-btn" value="Start" /></div>');
+//     htmls.push('</div>');
 
-    $('#table-browse-modal').html(htmls.join(''))
-        .show();
+//     $('#table-browse-modal').html(htmls.join(''))
+//         .show();
 
-    // click correlation start
-    $('#table-browse-modal .correlation-btn').on('click', function () {
-        var data = {
-            category: MY_DATA.modalCategory,
-            type: MY_DATA.modalCancerType,
-            feature: MY_DATA.selectedGeneValue,
-            entrez: MY_DATA.entrez,
-        };
+//     // click correlation start
+//     $('#table-browse-modal .correlation-btn').on('click', function () {
+//         var data = {
+//             category: MY_DATA.modalCategory,
+//             type: MY_DATA.modalCancerType,
+//             feature: MY_DATA.selectedGeneValue,
+//             entrez: MY_DATA.entrez,
+//         };
 
-        var cgcites = [];
-        $('#table-browse-modal .correlationTable input[type="checkbox"]').each(function (index) {
-            if (!$(this).is(":checked")) {
-                return;
-            }
-            cgcites.push(result["d"][index]["Cgcite"]);
-        })
+//         var cgcites = [];
+//         $('#table-browse-modal .correlationTable input[type="checkbox"]').each(function (index) {
+//             if (!$(this).is(":checked")) {
+//                 return;
+//             }
+//             cgcites.push(result["d"][index]["Cgcite"]);
+//         })
 
-        if (cgcites.length == 0) {
-            alert("Please select a row.");
-            return;
-        }
+//         if (cgcites.length == 0) {
+//             alert("Please select a row.");
+//             return;
+//         }
 
-        data["cgcites"] = cgcites.join(",");
-        drawCorrelationChart(data)
-    })
-}
+//         data["cgcites"] = cgcites.join(",");
+//         drawCorrelationChart(data)
+//     })
+// }
 
 /**
  * search for the gene names
@@ -1160,53 +1047,6 @@ function showGeneSearchResult(data) {
     $('.search-result').html($html).show();
 }
 
-function drawCorrelationChart(data) {
-    try {
-        startModalLoading();
-
-        $.ajax({
-            url: rootUrl + '/api/correlation',
-            type: "GET",
-            dataType: "json",
-            data: data,
-            complete: function (data, textStatus, jqXHR) {
-                stopModalLoading();
-            },
-            success: function (result, textStatus, jqXHR) {
-                if (result.status == "success") {
-                    $('#chart2-browse-modal').show();
-                    $('#chart2-browse-modal').html(result["data"]["correlations"].join(""));
-                } else {
-                    alert(result.message || "error");
-                }
-            },
-            error: function (XMLHttpRequest, textStatus, errorThrown) {
-                alert("Error: " + XMLHttpRequest);
-            }
-        });
-    } catch (e) {
-
-    }
-}
-
-// function startLoading() {
-//     if (MY_DATA.loadingFlag == 0){
-//         $("body").loading();
-//         $('.loading-overlay-content').html('<img src="' + rootUrl + '/static/images/loading.gif" /> Loading...');
-//     }
-
-//     MY_DATA.loadingFlag++;
-// }
-
-// function stopLoading() {
-//     MY_DATA.loadingFlag--;
-
-//     if (MY_DATA.loadingFlag <= 0) {
-//         MY_DATA.loadingFlag = 0;
-//         $("body").loading("stop");
-//     }
-// }
-
 function startModalLoading() {
     if (MY_DATA.loadingModalFlag == 0) {
         $(".modal").loading();
@@ -1224,11 +1064,3 @@ function stopModalLoading() {
         $(".modal").loading("stop");
     }
 }
-
-// function downloadChart(category, type, feature, mode, L_per, H_per) {
-//     window.open(rootUrl + '/api/chart/download?category=' + category + '&type=' + type + '&feature=' + feature + '&mode=' + mode + '&L_per=' + L_per + '&H_per=' + H_per);
-// }
-
-// function downloadAftPlot(category, type, feature, cgcite, survivalType) {
-//     window.open(rootUrl + '/api/aftplot/download?category=' + category + '&type=' + type + '&feature=' + feature + '&cgcite=' + cgcite + '&survival_type=' + survivalType);
-// }

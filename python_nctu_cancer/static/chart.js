@@ -81,14 +81,19 @@ function drawChart(mode, category, isModal) {
         H_per = $('#chart-HP').val();
         time = $('#chart-time').val();
     }
+    
     console.log("mode: " + mode, 
                 "category: " + category, 
                 "time: " + time, 
                 "isModal: " + isModal, 
                 "H_per: " + H_per, 
-                "L_per: " + L_per);
+                "L_per: " + L_per,
+                "MY_DATA", MY_DATA);
 
     try {
+        if (parseInt(L_per) + parseInt(H_per) > 100){
+            throw "Numbers should not sum to over 100."
+        }
         if (isModal) {
             startModalLoading();
         } else {
@@ -140,7 +145,13 @@ function drawChart(mode, category, isModal) {
             }
         });
     } catch (e) {
-        console.log(e)
+        if (isModal) {
+            stopModalLoading();
+        } else {
+            stopLoading();
+        }
+        console.log(e);
+        alert(e);
     }
 }
 
@@ -244,8 +255,12 @@ function showImgTable($chart, tab) {
         
         for (i = 0; i < summaries.length; i ++) {
             tmpKey = summaries[i]["_gene_name"];
-            htmls.push('<tr align="center"><td>' + tmpKey + '</td><td>' + summaries[i]["exp(coef)"].toFixed(2) + '</td>');
-            htmls.push('<td>[' + summaries[i]["exp(coef) lower 95%"].toFixed(2) + ', ' + summaries[i]["exp(coef) upper 95%"].toFixed(2) + ']</td>');
+            console.log(summaries[i]["exp(coef)"], summaries[i]["exp(coef) lower 95%"], summaries[i]["exp(coef) upper 95%"]);
+            
+            
+
+            htmls.push('<tr align="center"><td>' + tmpKey + '</td><td>' + summaries[i]["exp(coef)"] + '</td>');
+            htmls.push('<td>[' + summaries[i]["exp(coef) lower 95%"] + ', ' + summaries[i]["exp(coef) upper 95%"] + ']</td>');
             if(parseFloat(summaries[i]["p"]) < 0.05) {
                 htmls.push('<td style="white-space: nowrap; color: red;">' + summaries[i]["p"] + '</td>');
             }else{
@@ -281,7 +296,7 @@ function showImgTable($chart, tab) {
     $chart.html(htmls.join(''));
 }
 
-function addAftChartDownloadButton(category, type, feature, cgcite, survivalType){
+function addAftChartDownloadButton($chart, category, type, feature, cgcite, survivalType){
     var $download = '<div style="text-align:center; padding-bottom: 40px;"><a href="#" onclick="downloadAftPlot(\'' + category + '\', \'' + type + '\', \'' + feature + '\', \'' + cgcite + '\', \'' + survivalType + '\')">Download clinical data</a></div>';
     $chart.append($download);
 }
@@ -307,8 +322,8 @@ function _settingSelectColumns($chartObj) {
         htmls.push('<div>');
         htmls.push('<input type="file" name="upload_file" class="cox_aft_file" accept=".csv" style="display: none;" />');
         htmls.push('<span class="temp_file_text"></span>');
-        htmls.push('<input type="button" class="select_file" value="Select file" />&emsp;');
-        htmls.push('<input type="button" class="csv_upload" value="Upload & reanalyze" />&emsp;');
+        // htmls.push('<input type="button" class="select_file" value="Select file" />&emsp;');
+        // htmls.push('<input type="button" class="csv_upload" value="Upload & reanalyze" />&emsp;');
         isModal = $("#chart-cox-modal").length && !$("#chart-cox-modal").is(':hidden')
         htmls.push('<input type="button" value="Download PDF" onclick="downloadPdf(' + isModal + ')" />');
         htmls.push('</div>');
@@ -370,6 +385,8 @@ function drawNewAftChart(category, tab, type, feature, cgcite, survivalType, ign
                 if (ignore !== 1) {
                     _showSelectColumns($chart2);
                 }
+                addAftChartDownloadButton($chart2, category, type, feature, cgcite, survivalType);
+
             } else {
                 alert(result.message || "error");
             }
@@ -394,63 +411,63 @@ function drawNewAftChart(category, tab, type, feature, cgcite, survivalType, ign
             drawNewAftChart(category, tab, type, feature, cgcite, survivalType, 1);
         })
         
-        $chartObj.find('.csv_upload').on('click', function() { // do upload custom excel
-            if ($chartObj.find('.cox_aft_file').val() == "") {
-                alert("Please select a file.");
-                return;
-            }
+        // $chartObj.find('.csv_upload').on('click', function() { // do upload custom excel
+        //     if ($chartObj.find('.cox_aft_file').val() == "") {
+        //         alert("Please select a file.");
+        //         return;
+        //     }
     
-            if (["methylation27k", "methylation450k"].includes(category) && $('#tbl-browse-modal').length) {
-                startModalLoading();
-            } else {
-                startLoading();
-            }
+        //     if (["methylation27k", "methylation450k"].includes(category) && $('#tbl-browse-modal').length) {
+        //         startModalLoading();
+        //     } else {
+        //         startLoading();
+        //     }
 
-            var file_data = $chartObj.find('.cox_aft_file').prop('files')[0];   
-            var form_data = new FormData();
-            form_data.append('upload_file', file_data);
-            form_data.append('category', category);
-            form_data.append('tab', tab);
-            form_data.append('type', MY_DATA.selectedCancerType);
-            form_data.append('feature', MY_DATA.selectedMetaFeature);
-            form_data.append('cgcite', cgcite);
-            form_data.append('survival_type', survivalType);
-            $.ajax({
-                url: rootUrl + '/api/aftplot/upload', // <-- point to server-side PHP script 
-                dataType: 'json',  // <-- what to expect back from the PHP script, if anything
-                cache: false,
-                contentType: false,
-                processData: false,
-                data: form_data,                         
-                type: 'post',
-                complete: function (data, textStatus, jqXHR) {
-                    if (["methylation27k", "methylation450k"].includes(category) && $('#tbl-browse-modal').length) {
-                        stopModalLoading();
-                    } else {
-                        stopLoading();
-                    }
-                },
-                success: function (result, textStatus, jqXHR) {
-                    if (result.status == "success") {
-                        MY_DATA.chartData = result;
+        //     var file_data = $chartObj.find('.cox_aft_file').prop('files')[0];   
+        //     var form_data = new FormData();
+        //     form_data.append('upload_file', file_data);
+        //     form_data.append('category', category);
+        //     form_data.append('tab', tab);
+        //     form_data.append('type', MY_DATA.selectedCancerType);
+        //     form_data.append('feature', MY_DATA.selectedMetaFeature);
+        //     form_data.append('cgcite', cgcite);
+        //     form_data.append('survival_type', survivalType);
+        //     $.ajax({
+        //         url: rootUrl + '/api/aftplot/upload', // <-- point to server-side PHP script 
+        //         dataType: 'json',  // <-- what to expect back from the PHP script, if anything
+        //         cache: false,
+        //         contentType: false,
+        //         processData: false,
+        //         data: form_data,                         
+        //         type: 'post',
+        //         complete: function (data, textStatus, jqXHR) {
+        //             if (["methylation27k", "methylation450k"].includes(category) && $('#tbl-browse-modal').length) {
+        //                 stopModalLoading();
+        //             } else {
+        //                 stopLoading();
+        //             }
+        //         },
+        //         success: function (result, textStatus, jqXHR) {
+        //             if (result.status == "success") {
+        //                 MY_DATA.chartData = result;
 
-                        var $chartUpload;
-                        if (["methylation27k", "methylation450k"].includes(category) && $('#tbl-browse-modal').length) {
-                            $chartUpload = $('#chart-modal-upload');
-                        } else {
-                            $chartUpload = $('#chart-upload');
-                        }
-                        showImgTable($chartUpload, tab);
-                        addAftChartDownloadButton(category, type, feature, cgcite, survivalType);
-                    } else {
-                        alert(result.message || "error");
-                    }
-                },
-                error: function (XMLHttpRequest, textStatus, errorThrown) {
-                    alert("Error: " + XMLHttpRequest);
-                }
-            });
-        });
+        //                 var $chartUpload;
+        //                 if (["methylation27k", "methylation450k"].includes(category) && $('#tbl-browse-modal').length) {
+        //                     $chartUpload = $('#chart-modal-upload');
+        //                 } else {
+        //                     $chartUpload = $('#chart-upload');
+        //                 }
+        //                 showImgTable($chartUpload, tab);
+        //                 addAftChartDownloadButton($chartUpload, category, type, feature, cgcite, survivalType);
+        //             } else {
+        //                 alert(result.message || "error");
+        //             }
+        //         },
+        //         error: function (XMLHttpRequest, textStatus, errorThrown) {
+        //             alert("Error: " + XMLHttpRequest);
+        //         }
+        //     });
+        // });
     }
 }
 
@@ -583,4 +600,107 @@ function boxPlot() {
 
     $chart.html("").show();
     Plotly.newPlot(divId, data, layout);
+}
+
+function drawCorrelationChart(data) {
+    console.log(data);
+    try {
+        startModalLoading();
+
+        $.ajax({
+            url: rootUrl + '/api/correlation',
+            type: "GET",
+            dataType: "json",
+            data: data,
+            complete: function (data, textStatus, jqXHR) {
+                stopModalLoading();
+            },
+            success: function (result, textStatus, jqXHR) {
+                if (result.status == "success") {
+                    $('#chart2-browse-modal').show();
+                    $('#chart2-browse-modal').html(result["data"]["correlations"].join(""));
+                } else {
+                    alert(result.message || "error");
+                }
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                alert("Error: " + XMLHttpRequest);
+            }
+        });
+    } catch (e) {
+
+    }
+}
+
+/**
+ * Show current expression's custom table, prepare to click button and show correlation chart
+ * @param {*} result
+ */
+function showCustomExpressionTable(result) {
+    var htmls = [], i, val1, val2, val3, val4;
+
+    htmls.push('<div>');
+    htmls.push('<table class="correlationTable">');
+    htmls.push('<tr>');
+    htmls.push('<th></th>');
+    htmls.push('<th>Cgsite</th>');
+    htmls.push('<th>Pearson cor</th>');
+    htmls.push('<th>Pearson P-val</th>');
+    htmls.push('<th>Spearman cor</th>');
+    htmls.push('<th>Spearman P-val</th>');
+    htmls.push('</tr>')
+    for (i = 0; i < result["d"].length; i++) {
+        val1 = "";
+        val2 = "";
+        val3 = "";
+        val4 = "";
+        if (typeof result["correlations"][i] != "undefined" && result["correlations"][i] != "") {
+            val1 = result["correlations"][i][0];
+            val2 = result["correlations"][i][1];
+            val3 = result["correlations"][i][2];
+            val4 = result["correlations"][i][3];
+        }
+
+        htmls.push('<tr>');
+        htmls.push('<td><input type="checkbox" /></td>');
+        htmls.push('<td>' + result["d"][i]["Cgcite"] + '</td>');
+        htmls.push('<td>' + val1 + '</td>');
+        htmls.push('<td>' + val2 + '</td>');
+        htmls.push('<td>' + val3 + '</td>');
+        htmls.push('<td>' + val4 + '</td>');
+        htmls.push('</tr>')
+    }
+    htmls.push('</table>');
+
+    htmls.push('<div><input type="button" class="correlation-btn" value="Start" /></div>');
+    htmls.push('</div>');
+
+    $('#table-browse-modal').html(htmls.join('')).show();
+
+    // click correlation start
+    $('#table-browse-modal .correlation-btn').on('click', function () {
+        console.log("MY_DATA", MY_DATA);
+        var data = {
+            category: MY_DATA.modalCategory,
+            type: MY_DATA.modalCancerType,
+            feature: MY_DATA.methylationGene,
+            entrez: MY_DATA.entrez,
+        };
+
+        var cgcites = [];
+        $('#table-browse-modal .correlationTable input[type="checkbox"]').each(function (index) {
+            if (!$(this).is(":checked")) {
+                return;
+            }
+            cgcites.push(result["d"][index]["Cgcite"]);
+        })
+
+        if (cgcites.length == 0) {
+            alert("Please select a row.");
+            return;
+        }
+
+        data["cgcites"] = cgcites.join(",");
+        drawCorrelationChart(data)
+    })
 }

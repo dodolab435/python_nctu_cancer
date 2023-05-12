@@ -9,6 +9,7 @@ services:
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf
       - ./python_nctu_cancer:/app
+      - ./log:/var/log/nginx
     depends_on:
       - web
   web:

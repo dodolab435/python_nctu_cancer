@@ -326,7 +326,16 @@ class MoreGene:
         print(exp_mirna)
         data = {}
         for mode in modes:
-            data[mode] = {}
+            full_name = 'Overall'
+            if mode =='OS':
+                full_name = 'Overall'
+            elif mode=='DFI':
+                full_name = 'Disease-Free'
+            elif mode=='PFI':
+                full_name = 'Progression-Free'
+            elif mode=='DSS':
+                full_name = 'Disease-Specific'
+            data[full_name] = {}
             try:
                 # 取得指定存在檔案路徑
                 target_path = self.path + "Cox_parsedata" + os.sep
@@ -363,8 +372,8 @@ class MoreGene:
                 # 4
                 # print(new_df.shape[0])
                 #####5,6,7,8(cox, aft)
-                data[mode] = self.cox(new_df, mode, all)
-                data[mode]["patients"] = new_df.shape[0]
+                data[full_name] = self.cox(new_df, mode, all)
+                data[full_name]["patients"] = new_df.shape[0]
             except Exception as e:
                 print("exception =", str(e))
                 
@@ -372,6 +381,8 @@ class MoreGene:
 
     def get_aft_data(self, cancer_type, gene_mrnas, gene_mirnas, gene_lncrnas):
         modes = ['OS','DFI','PFI','DSS']
+        
+        
         
         exp_mrna = []
         exp_mirna = []
@@ -385,7 +396,16 @@ class MoreGene:
         
         data = {}
         for mode in modes:
-            data[mode] = {}
+            full_name = 'Overall'
+            if mode =='OS':
+                full_name = 'Overall'
+            elif mode=='DFI':
+                full_name = 'Disease-Free'
+            elif mode=='PFI':
+                full_name = 'Progression-Free'
+            elif mode=='DSS':
+                full_name = 'Disease-Specific'
+            data[full_name] = {}
             try:
                 # 取得指定存在檔案路徑
                 target_path = self.path + "Cox_parsedata" + os.sep
@@ -422,8 +442,8 @@ class MoreGene:
                 # 4
                 # print(new_df.shape[0])
                 #####5,6,7,8(cox, aft)
-                data[mode] = self.aft(new_df, mode, all)
-                data[mode]["patients"] = new_df.shape[0]
+                data[full_name] = self.aft(new_df, mode, all)
+                data[full_name]["patients"] = new_df.shape[0]
             except Exception as e:
                 print("exception =", str(e))
                 

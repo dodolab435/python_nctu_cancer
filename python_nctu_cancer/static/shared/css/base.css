@@ -1,4 +1,13 @@
 
+.title {
+    color: rgb(160, 194, 55);
+    /* color: #98978b; */
+}
+
+.fontNoBold {
+    font-weight: normal;
+}
+
 footer {
     font-family: Arial;
     position:fixed;

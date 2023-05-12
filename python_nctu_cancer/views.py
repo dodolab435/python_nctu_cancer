@@ -741,22 +741,16 @@ class AftPlotView(APIView):
 
             new_aft = NewAft()
             data = {}
+            cox_data = new_aft.get_aft_cox_img_data(tab, cancer_category, type, feature, cgcite, survival_type, drop_image_columns)
+            data["img"] = cox_data[0]
+            data["summary"] = cox_data[1]
+            
             if tab == "cox":
-                cox_data = new_aft.get_cox_img_data(
-                    cancer_category, type, feature, cgcite, survival_type, drop_image_columns)
-                data["img"] = cox_data[0]
-                data["summary"] = cox_data[1]
                 data["test_summary"] = cox_data[2]
-            elif tab == "aft":
-                cox_data = new_aft.get_aft_img_data(
-                    cancer_category, type, feature, cgcite, survival_type, drop_image_columns)
-                data["img"] = cox_data[0]
-                data["summary"] = cox_data[1]
-            else:
-                data["img"] = ""
-                data["summary"] = []
+                
             result["data"] = data
         except Exception as e:
+            print(traceback.format_exc())
             result["status"] = "error"
             result["message"] = str(e)
 
@@ -1599,22 +1593,6 @@ from lifelines import CoxPHFitter
 from matplotlib import pyplot as plt
 from lifelines.statistics import proportional_hazard_test
 
-def cox_aft_plothtml(cox_aft, status_col, day_col, n):
-    cox_aft.plot()
-    # 轉成圖片的步驟
-    sio = BytesIO()
-
-    #plt.title('(n='+n+')')
-    plt.xlabel("log (Hazard Ratio) (95% CI)")
-    plt.title('Hazard Ratio Plot (status=%s, day=%s, n=%s)' % (status_col, day_col, n))
-    plt.savefig(sio, format='png', dpi=300, bbox_inches='tight')
-    data = base64.encodebytes(sio.getvalue()).decode()
-
-    html = '''
-        <img class="aftImg" src="data:image/png;base64,{}" />
-    '''.format(data)
-    plt.close()
-    return html
 
 class UpLoadSurvivalCoxView(APIView):
     def post(self, request, *args, **kwargs):
@@ -1625,49 +1603,53 @@ class UpLoadSurvivalCoxView(APIView):
             day_col = request.POST.get("day_col")
             status_col = request.POST.get("status_col")
             expression_col_list = request.POST.getlist("expression_col_list")
-            # expression_col = request.POST.get("gene_expression_col")
+            expression_col_class_list = request.POST.getlist("expression_col_class_list")
+            expression_col_base_list = request.POST.getlist("expression_col_base_list")
             
-            drop_image_columns = request.POST.getlist("drop_image_columns")
+            # drop_image_columns = request.POST.getlist("drop_image_columns")
             
-            print(day_col, status_col, expression_col_list, drop_image_columns)
+            print(day_col, status_col, expression_col_list, expression_col_class_list, expression_col_base_list)
             file = request.FILES.get("file")
             
             
             select_col = expression_col_list.copy()
+            expression_col_class_list.append("value")
             select_col.append(day_col)
+            expression_col_class_list.append("value")
             select_col.append(status_col)
             
             df = pd.read_csv(BytesIO(file.read()))[select_col]
-            df.drop(drop_image_columns, axis=1, inplace=True)
-            n = str(df.shape[0])
+            for i in range(len(select_col)):
+                col_exp = select_col[i]
+                col_class = expression_col_class_list[i]
+                
+                if col_class == "continuous":
+                    df[col_exp] = pd.to_numeric(df[col_exp])
+                elif col_class == "category":
+                    base_val = expression_col_base_list[i]
+                    
+                    temp_df = pd.get_dummies(df[col_exp]).apply(pd.to_numeric)
+                    
+                    temp_col_name = {}
+                    for col_name in temp_df.columns:
+                        temp_col_name[col_name] = "%s_%s" % (col_exp, col_name)
+                    temp_df = temp_df.rename(columns=temp_col_name)
+                    temp_df = temp_df.drop("%s_%s" % (col_exp, base_val), axis=1)
+                    
+                    df = pd.concat([df, temp_df], axis=1)
+                    df = df.drop(col_exp, axis=1)
             
-            cox = CoxPHFitter()
-            cox.fit(df, duration_col=day_col, event_col=status_col)
+            n = len(df)
+            plt_title = 'Hazard Ratio Plot (status=%s, day=%s, n=%s)' % (status_col, day_col, n)
+            new_aft = NewAft()
+            cox_data = new_aft.aft_cox_img("cox", df, day_col, status_col, plt_title)
             
-            summary_df = cox.summary
+            data = {}
+            data["img"] = cox_data[0]
+            data["summary"] = cox_data[1]
+            data["test_summary"] = cox_data[2]
             
-            html = cox_aft_plothtml(cox, status_col, day_col, n)
-
-            # PH assumption
-            results = proportional_hazard_test(cox, df, time_transform='rank')
-            # results.print_summary(decimals=3)
-            test_summary = results.__dict__
-            test_summary = json.loads(json.dumps(test_summary, cls = py.utils.PlotlyJSONEncoder))
-
-            # format and replace value
-            tmp_df = summary_df.to_dict('index')
-            for key, value in tmp_df.items():
-                value["p"] = format(value["p"], ".2E")
-                value["coef"] = format(value["coef"], ".2E")
-                if math.isinf(value["exp(coef) upper 95%"]):
-                    value["exp(coef) upper 95%"] = 1
-                tmp_df[key] = value
-
-            # result['data'] = [html, tmp_df, test_summary]
-            result['data'] = {}
-            result['data']["img"] = html
-            result['data']["summary"] = tmp_df
-            result['data']["test_summary"] = test_summary
+            result["data"] = data
         except Exception as e:
             result["status"] = "error"
             result["message"] = str(e)
@@ -1684,44 +1666,52 @@ class UpLoadSurvivalAftView(APIView):
             day_col = request.POST.get("day_col")
             status_col = request.POST.get("status_col")
             expression_col_list = request.POST.getlist("expression_col_list")
-            # expression_col = request.POST.get("gene_expression_col")
+            expression_col_class_list = request.POST.getlist("expression_col_class_list")
+            expression_col_base_list = request.POST.getlist("expression_col_base_list")
+   
+            # drop_image_columns = request.POST.getlist("drop_image_columns")
             
-            drop_image_columns = request.POST.getlist("drop_image_columns")
-            
-            print(day_col, status_col, expression_col_list, drop_image_columns)
+            print(day_col, status_col, expression_col_list, expression_col_class_list, expression_col_base_list)
             file = request.FILES.get("file")
             
             
             select_col = expression_col_list.copy()
+            expression_col_class_list.append("value")
             select_col.append(day_col)
+            expression_col_class_list.append("value")
             select_col.append(status_col)
             
             df = pd.read_csv(BytesIO(file.read()))[select_col]
-            df.drop(drop_image_columns, axis=1, inplace=True)
-            
-            aft = LogNormalAFTFitter()
-            
-            aft.fit(df, duration_col=day_col, event_col=status_col)
-
-            summary_df = aft.summary
-            
-            n = str(df.shape[0])
-            html = cox_aft_plothtml(aft, status_col, day_col, n)
-
-
-            tmp_df = {}
-            for index, row in summary_df.iterrows():
-                tmp = {}
-                for key, value in row.items():
-                    tmp[key] = value
+            for i in range(len(select_col)):
+                col_exp = select_col[i]
+                col_class = expression_col_class_list[i]
+                
+                if col_class == "continuous":
+                    df[col_exp] = pd.to_numeric(df[col_exp])
+                elif col_class == "category":
+                    base_val = expression_col_base_list[i]
                     
-                tmp["p"] = format(tmp["p"], ".2E")
-                tmp["coef"] = format(tmp["coef"], ".2E")
-                tmp_df[index[1]] = tmp
-
-            result['data'] = {}
-            result['data']["img"] = html
-            result['data']["summary"] = tmp_df
+                    temp_df = pd.get_dummies(df[col_exp]).apply(pd.to_numeric)
+                    
+                    temp_col_name = {}
+                    for col_name in temp_df.columns:
+                        temp_col_name[col_name] = "%s_%s" % (col_exp, col_name)
+                    temp_df = temp_df.rename(columns=temp_col_name)
+                    temp_df = temp_df.drop("%s_%s" % (col_exp, base_val), axis=1)
+                    
+                    df = pd.concat([df, temp_df], axis=1)
+                    df = df.drop(col_exp, axis=1)
+            
+            n = len(df)
+            plt_title = 'Hazard Ratio Plot (status=%s, day=%s, n=%s)' % (status_col, day_col, n)
+            new_aft = NewAft()
+            cox_data = new_aft.aft_cox_img("cox", df, day_col, status_col, plt_title)
+            
+            data = {}
+            data["img"] = cox_data[0]
+            data["summary"] = cox_data[1]
+            
+            result["data"] = data
         except Exception as e:
             result["status"] = "error"
             result["message"] = str(e)
@@ -1731,10 +1721,15 @@ class UpLoadGetColView(APIView):
     def post(self, request, *args, **kwargs):
         file = request.FILES['file']
         df = pd.read_csv(BytesIO(file.read()))
+        
         col_list = list(df.columns)
         data = {
             'col': col_list,
         }
+        
+        for col in col_list:
+            data[col] = list(set(df[col].fillna("#NULL").to_list()))
+        
         result = {
             "status": "success",
             "data": data
