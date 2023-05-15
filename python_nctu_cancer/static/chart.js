@@ -127,6 +127,7 @@ function drawChart(mode, category, isModal) {
                 }
                 MY_DATA.chartJsonResult = result['data'];
                 MY_DATA.chartCategory = category;
+                MY_DATA.selectedSurvivalType = mode;
                 if (L_per == "" && H_per == ""){
                     if (isModal) {
                         $('#chart-modal-LP').val(result['data']['L_per']);
@@ -216,7 +217,7 @@ function showChart() {
     
     Plotly.newPlot(divId, chart1_data, chart_layout || {});
 
-    addChartDownloadButton($chart)
+    addChartDownloadButton($chart);
 }
 
 /**
@@ -384,8 +385,8 @@ function drawNewAftChart(category, tab, type, feature, cgcite, survivalType, ign
 
                 if (ignore !== 1) {
                     _showSelectColumns($chart2);
+                    addAftChartDownloadButton($chart2, category, type, feature, cgcite, survivalType);
                 }
-                addAftChartDownloadButton($chart2, category, type, feature, cgcite, survivalType);
 
             } else {
                 alert(result.message || "error");
@@ -410,64 +411,6 @@ function drawNewAftChart(category, tab, type, feature, cgcite, survivalType, ign
     
             drawNewAftChart(category, tab, type, feature, cgcite, survivalType, 1);
         })
-        
-        // $chartObj.find('.csv_upload').on('click', function() { // do upload custom excel
-        //     if ($chartObj.find('.cox_aft_file').val() == "") {
-        //         alert("Please select a file.");
-        //         return;
-        //     }
-    
-        //     if (["methylation27k", "methylation450k"].includes(category) && $('#tbl-browse-modal').length) {
-        //         startModalLoading();
-        //     } else {
-        //         startLoading();
-        //     }
-
-        //     var file_data = $chartObj.find('.cox_aft_file').prop('files')[0];   
-        //     var form_data = new FormData();
-        //     form_data.append('upload_file', file_data);
-        //     form_data.append('category', category);
-        //     form_data.append('tab', tab);
-        //     form_data.append('type', MY_DATA.selectedCancerType);
-        //     form_data.append('feature', MY_DATA.selectedMetaFeature);
-        //     form_data.append('cgcite', cgcite);
-        //     form_data.append('survival_type', survivalType);
-        //     $.ajax({
-        //         url: rootUrl + '/api/aftplot/upload', // <-- point to server-side PHP script 
-        //         dataType: 'json',  // <-- what to expect back from the PHP script, if anything
-        //         cache: false,
-        //         contentType: false,
-        //         processData: false,
-        //         data: form_data,                         
-        //         type: 'post',
-        //         complete: function (data, textStatus, jqXHR) {
-        //             if (["methylation27k", "methylation450k"].includes(category) && $('#tbl-browse-modal').length) {
-        //                 stopModalLoading();
-        //             } else {
-        //                 stopLoading();
-        //             }
-        //         },
-        //         success: function (result, textStatus, jqXHR) {
-        //             if (result.status == "success") {
-        //                 MY_DATA.chartData = result;
-
-        //                 var $chartUpload;
-        //                 if (["methylation27k", "methylation450k"].includes(category) && $('#tbl-browse-modal').length) {
-        //                     $chartUpload = $('#chart-modal-upload');
-        //                 } else {
-        //                     $chartUpload = $('#chart-upload');
-        //                 }
-        //                 showImgTable($chartUpload, tab);
-        //                 addAftChartDownloadButton($chartUpload, category, type, feature, cgcite, survivalType);
-        //             } else {
-        //                 alert(result.message || "error");
-        //             }
-        //         },
-        //         error: function (XMLHttpRequest, textStatus, errorThrown) {
-        //             alert("Error: " + XMLHttpRequest);
-        //         }
-        //     });
-        // });
     }
 }
 
