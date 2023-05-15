@@ -391,6 +391,7 @@ class Kmplotter:
         mode = mode.upper()
 
         new_df = self.get_logrank_data(category, cancer_type, meta_feature, mode)
+        new_df = self.drop_nan(new_df, ['Expression', mode, mode + '.time'])
         new_df = self.seperate_group(new_df, 'Expression', mode, mode + '.time', time, L_per, H_per)
 
         return new_df
