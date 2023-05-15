@@ -415,8 +415,8 @@ function drawMoreGeneChart(mode, ignore) {
 
                     if (ignore !== 1) {
                         _showSelectColumns($chart2);
+                        addMoreAftChartDownloadButton($chart2, mode)
                     }
-                    addAftChartDownloadButton($chart2, mode)
                 } else {
                     alert(result.message || "error");
                 }
@@ -444,55 +444,6 @@ function drawMoreGeneChart(mode, ignore) {
     
             drawMoreGeneChart(mode, 1);
         })
-        
-        $chartObj.find('.csv_upload').on('click', function() { // do upload custom excel
-            if ($chartObj.find('.cox_aft_file').val() == "") {
-                alert("Please select a file.");
-                return;
-            }
-
-            startLoading();
-
-            var file_data = $chartObj.find('.cox_aft_file').prop('files')[0];   
-            var form_data = new FormData();
-            form_data.append('upload_file', file_data);
-            for (var k in dataParams) {
-                if (typeof dataParams[k] === 'object') {
-                    for (var l in dataParams[k]) {
-                        form_data.append(k + '[]', dataParams[k][l]);
-                    }
-                } else {
-                    form_data.append(k, dataParams[k]);
-                }
-            }
-            
-            $.ajax({
-                url: rootUrl + '/api/more_gene/upload', // <-- point to server-side PHP script 
-                dataType: 'json',  // <-- what to expect back from the PHP script, if anything
-                cache: false,
-                contentType: false,
-                processData: false,
-                data: form_data,                         
-                type: 'post',
-                complete: function (data, textStatus, jqXHR) {
-                    stopLoading();
-                },
-                success: function (result, textStatus, jqXHR) {
-                    if (result.status == "success") {
-                        MY_DATA.chartData = result;
-                        
-                        var $chartUpload = $('#chart-upload');
-                        showImgTable($chartUpload, MY_DATA.selectedTab);
-                        addAftChartDownloadButton($chartUpload, mode)
-                    } else {
-                        alert(result.message || "error");
-                    }
-                },
-                error: function (XMLHttpRequest, textStatus, errorThrown) {
-                    alert("Error: " + XMLHttpRequest);
-                }
-            });
-        });
     }
 }
 
@@ -520,7 +471,7 @@ function downloadMoreGene(mode) {
     $('#downloadForm').submit();
 }
 
-function addAftChartDownloadButton($chart, mode){
+function addMoreAftChartDownloadButton($chart, mode){
     var $download = '<div style="text-align:center; padding-bottom: 40px;"><a href="#" onclick="downloadMoreGene(\'' + mode + '\')">Download clinical data</a></div>';
     $chart.append($download);
 }
