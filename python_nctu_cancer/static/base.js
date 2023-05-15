@@ -38,9 +38,9 @@ function showModal(e, category, gene, entrez) {
     $('#tbl-browse-modal').modal("show");
 
     if (category == "methylation27k") {
-        $('#tbl-browse-modal .modal-title').text('methylation 27k');
+        $('#tbl-browse-modal .modal-title').text('methylation 27k (' + gene +')');
     } else {
-        $('#tbl-browse-modal .modal-title').text('methylation 450k');
+        $('#tbl-browse-modal .modal-title').text('methylation 450k (' + gene +')');
     }
 
     // reset tab
