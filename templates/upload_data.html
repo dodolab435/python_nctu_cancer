@@ -12,12 +12,18 @@
          <div class="row">
             <div class="row col-lg-12" style="padding-top: 10px;">
                <div>
+                  <label class="step">Step 1:</label>
+                  <br>
                   <label class="title">File :</label>
                   <input type="file" id="input-file" name="file" style="display: inline-block;vertical-align: middle;" />
                   <input type="button" value="Load" id="load_col" class="btn btn-default action-button type-btn" style="display: inline-block;vertical-align: middle; padding: 4px 12px" />
+                  &nbsp;&nbsp;
+                  <button onclick="downloadDemoData()">Download demo data</button>
                </div>
                <br>
                <div id="col_select_div" hidden>
+                  <label class="step">Step 2:</label>
+                  <br>
                   <label class="title">Survival day at:</label>
                   <select id="day_col" name="day_col"></select>
                   &nbsp;&nbsp;
@@ -31,10 +37,13 @@
                   </select>
                   <br>
                   <br>
+
+                  <label class="step">Step 3:</label>
+                  <br>
                   <label class="title">Select column(s) to analyze:</label>
                   <br>
-                  <div id="gene_expression_logrank_div" style="max-height:300px;overflow-y:auto;display: inline-block;vertical-align: middle;"></div>
-                  <div id="gene_expression_coxaft_div" style="max-height:300px;overflow-y:auto;display: inline-block;vertical-align: middle;"></div>
+                  <div id="gene_expression_logrank_div" class="selectContainer"></div>
+                  <div id="gene_expression_coxaft_div" class="selectContainer"></div>
                </div>
             </div>
          </div>

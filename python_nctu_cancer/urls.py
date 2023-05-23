@@ -48,7 +48,7 @@ urlpatterns = [
     path('api/correlation', views.CorrelationView.as_view(), name='correlation'),
     path('api/aftplot', views.AftPlotView.as_view(), name='aftplot'),
     path('api/aftplot/download', views.AftPlotDownloadView.as_view(), name='aftplot_download'),
-    path('api/aftplot/upload', views.AftPlotUploadView.as_view(), name='aftplot_upload'),
+    # path('api/aftplot/upload', views.AftPlotUploadView.as_view(), name='aftplot_upload'),
     path('api/boxplot', views.BoxPlotView.as_view(), name='boxplot'),
     path('api/feature', views.FeatureView.as_view(), name='feature'),
     
@@ -65,15 +65,16 @@ urlpatterns = [
     path('api/two_gene/download', views.TwoGeneDownloadView.as_view(), name='two_gene_download'),
     path('api/cox_two_gene', views.CoxTwoGeneView.as_view(), name='cox_two_gene'),
     path('api/cox_two_gene/img', views.CoxTwoGeneImgView.as_view(), name='cox_two_gene_img'),
-    path('api/cox_two_gene/upload', views.CoxTwoGeneUploadView.as_view(), name='cox_two_gene_upload'),
+    # path('api/cox_two_gene/upload', views.CoxTwoGeneUploadView.as_view(), name='cox_two_gene_upload'),
     path('api/cox_two_gene/download', views.CoxTwoGeneDownloadView.as_view(), name='cox_two_gene_download'),
     path('api/gene/name', views.GeneNameView.as_view(), name='gene_name'),
     path('api/more_gene', views.MoreGeneView.as_view(), name='more_gene'),
     path('api/more_gene/img', views.MoreGeneImgView.as_view(), name='more_gene_img'),
-    path('api/more_gene/upload', views.MoreGeneUploadView.as_view(), name='more_gene_upload'),
+    # path('api/more_gene/upload', views.MoreGeneUploadView.as_view(), name='more_gene_upload'),
     path('api/more_gene/download', views.MoreGeneDownloadView.as_view(), name='more_gene_download'),
     path('api/get_category', views.GetCategory.as_view(), name='get_category'),
     
+    path('api/download_demodata', views.DownloadDemoData.as_view(), name='download_demodata'),
     path('api/test', views.TestView.as_view(), name='api_test'),
     
     re_path(r'^static/(?P<path>.*)$', static.serve,

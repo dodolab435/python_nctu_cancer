@@ -9,7 +9,9 @@ var selectedGene = '';
 var dataSrc = {};
 
 $(function () {
-
+    $("#nav-gene").on("click", function () {
+        $('.shiny-plot-output').hide();
+    });
     // click OS, PFI, DFI, DSS
     $('.browse-gene-radio').on("click", function () {
         var subTab = "";
@@ -20,7 +22,6 @@ $(function () {
         })
 
         selectedGeneCategory = $(this).attr("name").split("-")[2]
-
         reloadGeneDataTableAjax(selectedGeneCategory, subTab);
 
     })

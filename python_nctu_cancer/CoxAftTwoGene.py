@@ -412,7 +412,7 @@ class CoxAftTwoGene:
         return res
 
     def get_cox_img(self, mode, category1, category2, gene1, gene2, cancer_type, drop_image_columns):
-        
+        print(mode, category1, category2, gene1, gene2, cancer_type, drop_image_columns)
         cox_data = []
         try:
             target_path = self.path + "Cox_parsedata" + os.sep + mode + "_parsedata" + os.sep
@@ -434,12 +434,12 @@ class CoxAftTwoGene:
 
             new_df = self.get_exp1(clinical_info, g1_exp_df[g1_exp_df[index1] == gene1])
             new_df = self.get_exp2(new_df, g2_exp_df[g2_exp_df[index2] == gene2])
-
+            # print(new_df)
             new_df = self.drop_nan(new_df)
             num = new_df.shape[1]
             new_df = self.transform1(new_df, num)
             new_df = self.transform2(new_df, num)
-
+            # print(new_df)
             cox_data = self.cox_img(new_df, mode, gene1, gene2, drop_image_columns, cancer_type)
         except Exception as e:
             print(str(e))

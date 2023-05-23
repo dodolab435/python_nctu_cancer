@@ -449,8 +449,8 @@ function drawCoxTwoGeneChart(mode, type, gene1, gene2, tab, ignore) {
 
                     if (ignore !== 1) {
                         _showSelectColumns($chart2);
+                        addAftChartDownloadButton($chart2, mode, type, gene1, gene2, tab);
                     }
-                    addAftChartDownloadButton($chart2, mode, type, gene1, gene2, tab);
                 } else {
                     alert(result.message || "error");
                 }

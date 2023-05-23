@@ -27,6 +27,7 @@ const_layout = {
     "xaxis1": {
         "title": 'Survival Time (Months)',
         "anchor": "y1",
+        "tickformat": ".1f",
     },
     "yaxis1": {
         "title": 'Probability of survival',
@@ -39,6 +40,10 @@ const_layout = {
     "yaxis2": {
         "title": 'Number of patients',
         "anchor": "x2",
+        "range": [
+            0,
+            1
+        ],
     },
     "titlefont": {
         "size": 12,
@@ -122,15 +127,20 @@ class Kmplotter:
 
     def get_genome(self, category, cancer_type, meta_feature):
         cur_coll = self.mongodb_conn["cancer_genome_" + category.lower()]
+        myquery = {"type": cancer_type}
         if "methylation" in category:
-            myquery = {"type": cancer_type, "Cgcite": meta_feature}
+            myquery["Cgcite"] = meta_feature
+        elif "lncrna" == category and meta_feature[:4] != "ENSG":
+            myquery["gene_symbol"] = meta_feature
         else:
-            myquery = {"type": cancer_type, "MetaFeature": meta_feature}
+            myquery["MetaFeature"] = meta_feature
         exclude_fields = {"category": False, "type": False, "Cgcite": False}
         return cur_coll.find(myquery, exclude_fields)
 
-    def get_survival_data(self, cancer_type, excel_df):
-
+    def get_survival_data(self, cancer_type):
+        path = os.path.abspath(os.path.dirname(__name__)) + os.sep + "python_nctu_cancer" + os.sep
+        excel_df = pd.read_excel(path + 'Supplemental/TCGA-CDR-SupplementalTableS1.xlsx')
+        
         survival_data = excel_df.loc[excel_df['type'] == cancer_type]
         survival_data = survival_data[[
                                         'bcr_patient_barcode', 
@@ -147,18 +157,14 @@ class Kmplotter:
 
         return survival_data
 
-    def get_exp(self, df1, df2):
+    def get_exp(self, df1, df2, exp_col="Expression"):
         temp = df1['bcr_patient_barcode'].tolist()
-
         exp = df2.iloc[0].tolist()
-        # print("exp = ", exp[0])
-        # exp = exp[1:]
 
         a = list(df2.columns.values)
         a = [i[:12] for i in a]
         dic1 = dict(zip(a, exp))
 
-        h = 0
         templist = []
         for x in temp:
             if x in dic1:
@@ -166,7 +172,7 @@ class Kmplotter:
             else:
                 templist.append(float('nan'))
 
-        df1['Expression'] = templist
+        df1[exp_col] = templist
 
         return df1
 
@@ -180,7 +186,6 @@ class Kmplotter:
             df = df[df[drop_col] != 'NA']
             df = df[df[drop_col] != 'NaN']
         df = df[drop_nan_col_list]
-        df = df.apply(pd.to_numeric)
         return df
 
     def follow_up_threshold(self, df, status_col, day_col, time):
@@ -192,7 +197,6 @@ class Kmplotter:
         elif int(time) == 10:
             limit = 3653
 
-        # print("@time =", time, ", @limit = ", limit)
         list1 = df[day_col].tolist()
         list2 = df[status_col].tolist()
 
@@ -213,7 +217,9 @@ class Kmplotter:
         return df
 
     # 表現量分群
-    def seperate_group(self, df, exp_col, status_col, day_col, time, L_per, H_per):
+    def seperate_group(self, df, exp_col, status_col, day_col, group_col="groups", time=0, L_per=50, H_per=50):
+        df[[exp_col, status_col, day_col]] = df[[exp_col, status_col, day_col]].apply(pd.to_numeric)
+        
         time = int(time)
         L_per = int(L_per)
         H_per = int(H_per)
@@ -245,9 +251,9 @@ class Kmplotter:
                 nL = df.shape[0] - nH
                 
         df1 = pd.DataFrame(df.iloc[-int(nH):])
-        df1['groups'] = 'H'
+        df1[group_col] = 'H'
         df2 = pd.DataFrame(df.iloc[0:int(nL)])
-        df2['groups'] = 'L'
+        df2[group_col] = 'L'
         df = pd.concat([df1, df2], axis=0, ignore_index=True)
         
         #if是指default的狀態和else是使用者輸入後
@@ -258,22 +264,25 @@ class Kmplotter:
             df = self.follow_up_threshold(df, status_col, day_col, time)
             return df
 
-    def log_rank(self, df, status_col, day_col):
+    def log_rank(self, df, status_col, day_col, group_col="groups"):
         date_df = df[day_col]
         event_df = df[status_col]
 
-        group = df["groups"]
-        i1 = (group == "L")
-        i2 = (group == "H")
+        group = df[group_col]
+        u = pd.unique(group)
+        if len(u) != 2:
+            raise "group num not 2"
+        i1 = (group == u[0])
+        i2 = (group == u[1])
         results = logrank_test(date_df[i1], date_df[i2], event_observed_A=event_df[i1], event_observed_B=event_df[i2])
         return str(results.p_value)
 
     def drawkmplot(self, df, status_col, day_col, groups_col):
-        # print(df)
         date = df[day_col]
         event = df[status_col]
         group_unique_list = np.unique(df[groups_col])
 
+        y2_range = 1
         chart_series = []
         for i in range(2):
             group_filter = (df[groups_col] == group_unique_list[i])
@@ -282,30 +291,36 @@ class Kmplotter:
             kmf = KaplanMeierFitter()
             kmf.fit(date[group_filter], event[group_filter], label=group_unique_list[i])
             
-            plx = kmf.survival_function_.index.values
-            ply = kmf.survival_function_[group_unique_list[i]].values
+            plx = kmf.survival_function_.index.values.tolist()
+            ply = kmf.survival_function_[group_unique_list[i]].values.tolist()
             
             # 圖片的線條換顏色，調整粗細 都在這迴圈裡面修改
             trace_line = current_series.copy()
-            trace_line["name"] = f"{group_unique_list[i]} (n={paramSize})"
-            trace_line["legendgroup"] = f"{group_unique_list[i]} (n={paramSize})"
-            trace_line["x"] = self.convert_days_to_Months(plx.tolist())
-            trace_line["y"] = ply.tolist()
+            trace_line["name"] = f"Group {group_unique_list[i]} (n={paramSize})"
+            trace_line["legendgroup"] = f"Group {group_unique_list[i]} (n={paramSize})"
+            trace_line["x"] = self.convert_days_to_Months(plx)
+            trace_line["y"] = ply
+            trace_line["hovertemplate"] = '%{y:.2f}'
             chart_series.append(trace_line)
             
             # 获取风险表
             risk_table = kmf.event_table
-            risk_x = risk_table.index
-            risk_y = risk_table['at_risk']
-            
+            risk_x = risk_table.index.tolist()
+            risk_y = risk_table['at_risk'] - 1
+            risk_y = risk_y.tolist()
+            risk_y[0] = risk_y[0] + 1
+
             trace_line = current_series.copy()
             trace_line["yaxis"] = "y2"
             trace_line["showlegend"] = False
-            trace_line["name"] = f"{group_unique_list[i]} (n={paramSize})"
-            trace_line["legendgroup"] = f"{group_unique_list[i]} (n={paramSize})"
-            trace_line["x"] = self.convert_days_to_Months(risk_x.tolist())
-            trace_line["y"] = risk_y.tolist()
+            trace_line["name"] = f"Group {group_unique_list[i]} (n={paramSize})"
+            trace_line["legendgroup"] = f"Group {group_unique_list[i]} (n={paramSize})"
+            trace_line["x"] = self.convert_days_to_Months(risk_x)
+            trace_line["y"] = risk_y
             chart_series.append(trace_line)
+            
+            if y2_range < max(risk_y):
+                y2_range = max(risk_y)
 
             # 這個是圖片上黑色marker，也要可以修改顏色和大小
             sur = kmf.survival_function_
@@ -323,15 +338,43 @@ class Kmplotter:
             trace_marker = trace_black.copy()
             trace_marker["x"] = self.convert_days_to_Months(temp_x)
             trace_marker["y"] = temp_y
+            trace_marker["hovertemplate"] = 'Censors: %{text:.2f}<extra></extra>'
+            trace_marker["text"] = temp_y
             
             chart_series.append(trace_marker)
             
+            # 
+            list_A = risk_table['observed'].tolist()
+            list_B = risk_table.index.tolist()
+            
+            temp_x = []
+            temp_y = []
+            temp_n = []
+            n = 0
+            for x in range(len(list_A)):
+                if list_A[x] == 0 and x != 0:
+                    temp_x.append(list_B[x])
+                    temp_y.append(float(risk_y[x]))
+                    n += 1
+                    temp_n.append(n)
+                    
+            
+            trace_marker = trace_black.copy()
+            trace_marker["yaxis"] = "y2"
+            trace_marker["showlegend"] = False
+            trace_marker["x"] = self.convert_days_to_Months(temp_x)
+            trace_marker["y"] = temp_y
+            trace_marker["hovertemplate"] = 'Accum. censors: %{text}<extra></extra>'
+            trace_marker["text"] = temp_n
+            chart_series.append(trace_marker)
+        
+        temp_layout = const_layout.copy()
+        temp_layout["yaxis2"]["range"][1] = y2_range
         chart_data = [dict(
                     chart1_data = Data(chart_series),
-                    layout = const_layout.copy()
+                    layout = temp_layout
                 )
             ]
-        
         return chart_data
 
     def fig(self, data, layout):
@@ -387,12 +430,12 @@ class Kmplotter:
         list = [x*0.03285 for x in list]
         return list
 
-    def get_download_data(self, category, cancer_type, meta_feature, mode, time, L_per, H_per):
+    def get_download_data(self, category, cancer_type, meta_feature, mode, time=0, L_per=50, H_per=50):
         mode = mode.upper()
 
         new_df = self.get_logrank_data(category, cancer_type, meta_feature, mode)
         new_df = self.drop_nan(new_df, ['Expression', mode, mode + '.time'])
-        new_df = self.seperate_group(new_df, 'Expression', mode, mode + '.time', time, L_per, H_per)
+        new_df = self.seperate_group(new_df, 'Expression', mode, mode + '.time', time=time, L_per=L_per, H_per=H_per)
 
         return new_df
 
@@ -406,10 +449,11 @@ class Kmplotter:
         dic = dict(zip(a, b))
         return dic[metafeature]
 
-    def get(self, category, cancer_type, meta_feature, mode, time, L_per, H_per):
+    def get(self, category, cancer_type, meta_feature, mode, time=0, L_per=50, H_per=50):
         
         if category == 'lncrna':
-            gene = self.get_gene(meta_feature)
+            # gene = self.get_gene(meta_feature)
+            gene = meta_feature
         elif category == 'mrna':
             gene = meta_feature.split("|")[0]
         elif category == 'mirna':
@@ -440,7 +484,7 @@ class Kmplotter:
             
         new_df = self.get_logrank_data(category, cancer_type, meta_feature, mode)
         new_df = self.drop_nan(new_df, [exp_col, status_col, day_col])
-        new_df = self.seperate_group(new_df, exp_col, status_col, day_col, time, L_per, H_per)
+        new_df = self.seperate_group(new_df, exp_col, status_col, day_col, time=time, L_per=L_per, H_per=H_per)
 
         p_val = self.log_rank(new_df, status_col, day_col)
 
@@ -469,9 +513,8 @@ class Kmplotter:
     def get_logrank_data(self, category, cancer_type, meta_feature, mode):
         mode = mode.upper()
 
-        path = os.path.abspath(os.path.dirname(__name__)) + os.sep + "python_nctu_cancer" + os.sep
-        excel_df = pd.read_excel(path + 'Supplemental/TCGA-CDR-SupplementalTableS1.xlsx')
-        excel_df = self.get_survival_data(cancer_type, excel_df)
+        
+        excel_df = self.get_survival_data(cancer_type)
 
         genome_dataset = self.get_genome(category, cancer_type, meta_feature)
         exp_df = pd.DataFrame(genome_dataset)
@@ -480,14 +523,13 @@ class Kmplotter:
 
         return new_df
 
-    def get_mkpolt(self, df, exp_col, status_col, day_col, time, L_per, H_per):
+    def get_mkpolt(self, df, exp_col, status_col, day_col, time=0, L_per=50, H_per=50):
         response = {'status': 'success'}
         
         df = self.drop_nan(df, [exp_col, status_col, day_col])
-        df = self.seperate_group(df, exp_col, status_col, day_col, time, L_per, H_per)
+        df = self.seperate_group(df, exp_col, status_col, day_col, time=time, L_per=L_per, H_per=H_per)
 
         p_val = self.log_rank(df, status_col, day_col)
-        print("pval" + p_val)
         
         
         try:
@@ -511,4 +553,247 @@ class Kmplotter:
                 # raise Exception('Invalid input percentage')
                 response['message'] = 'Invalid input percentage'
         return response
+
+#####
+
+    def get_expression_data(self, type, category, gene):
+        mongo_col = self.mongodb_conn["cancer_genome_" + category]
+        myquery = {
+            'type': type
+        }
+        if category == "lncrna":
+            myquery["gene_symbol"] = gene
+        else:
+            # myquery["MetaFeature"] = gene
+            myquery["MetaFeature"] = {"$regex": f"(^{gene}([;|,]))|^({gene})$"}
+
+        data = list(mongo_col.find(
+            myquery, {'_id': False, 'category': False, 'type': False}))
+
+        # Forcing change MetaFeature value
+        for i, d in enumerate(data):
+            for k in data[i]:
+                if k not in ["MetaFeature"]:
+                    continue
+                val = data[i][k]
+                if val.find("|") != -1:
+                    val = val.split("|")[0]
+                elif val.find(",") != -1:
+                    val = val.split(",")[0]
+                data[i][k] = val
+
+        data2 = pd.DataFrame(data)
+        return data2
+
+    def calculate_logrank_by_mode(self, category, full_survial_df, expression_df, meta_feature, mode):
+        data1 = full_survial_df[[
+            'bcr_patient_barcode', 'type', mode, f'{mode}.time']]
+        if category != 'lncrna':
+            new_df = self.get_exp(
+                data1, expression_df[expression_df['MetaFeature'] == meta_feature], meta_feature)
+        else:
+            new_df = self.get_exp(
+                data1, expression_df[expression_df['gene_symbol'] == meta_feature], meta_feature)
         
+        return new_df
+
+    def df_intersection(self, df1, df2, group1, group2, merge_on_col):
+        df1_group, df2_group = df1["groups"], df2["groups"]
+        df1_i1 = (df1_group == "H")
+        df1_i2 = (df1_group == "L")
+
+        df2_i1 = (df2_group == "H")
+        df2_i2 = (df2_group == "L")
+
+        if group1 == 'H' and group2 == 'H':
+            df1 = df1[df1_i1]
+            df2 = df2[df2_i1]
+        elif group1 == 'H' and group2 == 'L':
+            df1 = df1[df1_i1]
+            df2 = df2[df2_i2]
+        elif group1 == 'L' and group2 == 'H':
+            df1 = df1[df1_i2]
+            df2 = df2[df2_i1]
+        elif group1 == 'L' and group2 == 'L':
+            df1 = df1[df1_i2]
+            df2 = df2[df2_i2]
+
+        intersected_df = pd.merge(
+            df1, df2, on=merge_on_col, how='inner')
+        intersected_df["group_by"] = group1 + group2
+        return intersected_df
+
+    def reset_df(self, df, group1, group2):
+        if not isinstance(group1, list):
+            group1 = [group1]
+        if not isinstance(group2, list):
+            group2 = [group2]
+        
+        temp = group1.copy()
+        temp.extend(group2)
+        df = df[df["group_by"].isin(temp)]
+
+        temp_list = df["group_by"].tolist()
+        temp_list = ['1' if x in group1 else '2' for x in temp_list]
+
+        df["group_by"] = temp_list
+
+        return df
+
+    
+    def get_two_gene_data(self, category1, category2, gene1, gene2, cancer_type, group1, group2):
+        
+        full_survial_df = self.get_survival_data(cancer_type)
+        g1_exp_df = self.get_expression_data(cancer_type, category1, gene1)
+        g2_exp_df = self.get_expression_data(cancer_type, category2, gene2)
+        modes = ["OS", "PFI", 'DFI', 'DSS']
+
+        index_col = 'bcr_patient_barcode'
+        
+        res = []
+        for mode in modes:
+            status_col = mode
+            day_col = mode + '.time'
+            
+            if mode == 'OS':
+                full_name = 'Overall'
+            elif mode == 'DFI':
+                full_name = 'Disease-Free'
+            elif mode == 'PFI':
+                full_name = 'Progression-Free'
+            elif mode == 'DSS':
+                full_name = 'Disease-Specific'
+            try:
+                df1 = self.calculate_logrank_by_mode(
+                    category1, full_survial_df, g1_exp_df, gene1, mode)
+                df2 = self.calculate_logrank_by_mode(
+                    category2, full_survial_df, g2_exp_df, gene2, mode)
+
+                df1 = self.drop_nan(df1, [index_col, gene1, status_col, day_col])
+                df2 = self.drop_nan(df2, [index_col, gene2, status_col, day_col])
+
+                df1 = self.seperate_group(df1, gene1, status_col, day_col)
+                df2 = self.seperate_group(df2, gene2, status_col, day_col)
+                dfHH = self.df_intersection(df1, df2, 'H', 'H', [index_col, status_col, day_col])
+                dfHL = self.df_intersection(df1, df2, 'H', 'L', [index_col, status_col, day_col])
+                dfLH = self.df_intersection(df1, df2, 'L', 'H', [index_col, status_col, day_col])
+                dfLL = self.df_intersection(df1, df2, 'L', 'L', [index_col, status_col, day_col])
+                
+                HH = dfHH.shape[0]
+                HL = dfHL.shape[0]
+                LH = dfLH.shape[0]
+                LL = dfLL.shape[0]
+
+                new_df = pd.concat([dfHH, dfHL, dfLH, dfLL], ignore_index=True)
+                new_df = self.reset_df(new_df, group1, group2)
+
+                res.append({
+                    "survival_type": full_name,
+                    "patients": new_df.shape[0],
+                    "p_val": str(format(float(self.log_rank(new_df, status_col, day_col, "group_by")), ".2E")),
+                    "shape": {
+                        "HH": HH,
+                        "HL": HL,
+                        "LH": LH,
+                        "LL": LL
+                    }
+                })
+            except Exception as e:
+                raise Exception(str(e))
+        return res
+
+    def get_two_gene_img_data(self, category1, category2, mode, gene1, gene2, cancer_type, group1, group2, time):
+        mode = mode.upper()
+
+        if mode == 'OS':
+            title = "Overall"
+        elif mode == 'DFI':
+            title = "Disease-Free"
+        elif mode == 'DSS':
+            title = "Disease-Specific"
+        elif mode == 'PFI':
+            title = "Progression-Free"
+
+        index_col = 'bcr_patient_barcode'
+        status_col = mode
+        day_col = mode + '.time'
+        
+        response = {'status': 'SUCCESS'}
+
+        full_survial_df = self.get_survival_data(cancer_type)
+        g1_exp_df = self.get_expression_data(cancer_type, category1, gene1)
+        g2_exp_df = self.get_expression_data(cancer_type, category2, gene2)
+        df1 = self.calculate_logrank_by_mode(
+            category1, full_survial_df, g1_exp_df, gene1, mode)
+        df2 = self.calculate_logrank_by_mode(
+            category2, full_survial_df, g2_exp_df, gene2, mode)
+
+        df1 = self.drop_nan(df1, [index_col, gene1, status_col, day_col])
+        df2 = self.drop_nan(df2, [index_col, gene2, status_col, day_col])
+
+        df1 = self.seperate_group(df1, gene1, status_col, day_col)
+        df2 = self.seperate_group(df2, gene2, status_col, day_col)
+        
+        dfHH = self.df_intersection(df1, df2, 'H', 'H', [index_col, status_col, day_col])
+        dfHL = self.df_intersection(df1, df2, 'H', 'L', [index_col, status_col, day_col])
+        dfLH = self.df_intersection(df1, df2, 'L', 'H', [index_col, status_col, day_col])
+        dfLL = self.df_intersection(df1, df2, 'L', 'L', [index_col, status_col, day_col])
+        
+        new_df = pd.concat([dfHH, dfHL, dfLH, dfLL], ignore_index=True)
+        new_df = self.reset_df(new_df, group1, group2)
+        if len(new_df['group_by'].unique()) != 2:
+            response['status'] = "WARNING"
+            
+            if len(new_df['group_by'].unique()) == 1:
+                response['message'] = "No patient in group %s." % (1 if new_df['group_by'].unique() == ["2"] else 2)
+            else:
+                response['message'] = "No patient was found in both groups"
+                
+            return response
+        new_df = self.follow_up_threshold(new_df, status_col, day_col, time)
+
+        # print("@new_df = ", new_df)
+        pval = self.log_rank(new_df, status_col, day_col, "group_by")
+
+        chart_data = self.drawkmplot(new_df, status_col, day_col, 'group_by')
+        
+        if int(time) in [3,5,10]:
+            chart_data[0]['layout']["title"] = time + " years, "+cancer_type +', '+ title+" survival, p-val: " + \
+                str(format(float(pval), ".2E"))
+        else:
+            chart_data[0]['layout']["title"] =  cancer_type + ', ' + title + " survival, p-val: " + \
+                                     str(format(float(pval), ".2E"))
+
+        response['chart_data'] = chart_data
+        return response
+    
+    def get_download_two_gene_data(self, category1, category2, mode, gene1, gene2, cancer_type, group1, group2):
+    
+        mode = mode.upper()
+        index_col = 'bcr_patient_barcode'
+        status_col = mode
+        day_col = mode + '.time'
+
+        full_survial_df = self.get_survival_data(cancer_type)
+        g1_exp_df = self.get_expression_data(cancer_type, category1, gene1)
+        g2_exp_df = self.get_expression_data(cancer_type, category2, gene2)
+        df1 = self.calculate_logrank_by_mode(
+            category1, full_survial_df, g1_exp_df, gene1, mode)
+        df2 = self.calculate_logrank_by_mode(
+            category2, full_survial_df, g2_exp_df, gene2, mode)
+
+        df1 = self.drop_nan(df1, [index_col, gene1, status_col, day_col])
+        df2 = self.drop_nan(df2, [index_col, gene2, status_col, day_col])
+
+        df1 = self.seperate_group(df1, gene1, status_col, day_col)
+        df2 = self.seperate_group(df2, gene2, status_col, day_col)
+         
+        dfHH = self.df_intersection(df1, df2, 'H', 'H', [index_col, status_col, day_col])
+        dfHL = self.df_intersection(df1, df2, 'H', 'L', [index_col, status_col, day_col])
+        dfLH = self.df_intersection(df1, df2, 'L', 'H', [index_col, status_col, day_col])
+        dfLL = self.df_intersection(df1, df2, 'L', 'L', [index_col, status_col, day_col])
+        
+        new_df = pd.concat([dfHH, dfHL, dfLH, dfLL], ignore_index=True)
+
+        return new_df
+

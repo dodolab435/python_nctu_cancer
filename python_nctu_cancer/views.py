@@ -85,6 +85,7 @@ class LogRankView(APIView):
 
         # 轉換資料
         tmp_list = list(raw_data["data"])
+        print(tmp_list)
         data = []
         correlations = []
         for i, d in enumerate(tmp_list):
@@ -621,6 +622,7 @@ class ChartView(APIView):
                 }
 
         except Exception as e:
+            print(traceback.format_exc())
             resp_message["status"] = 'error'
             resp_message["message"] = str(e)
 
@@ -740,15 +742,8 @@ class AftPlotView(APIView):
             print("@data =", cancer_category, type, feature, survival_type)
 
             new_aft = NewAft()
-            data = {}
-            cox_data = new_aft.get_aft_cox_img_data(tab, cancer_category, type, feature, cgcite, survival_type, drop_image_columns)
-            data["img"] = cox_data[0]
-            data["summary"] = cox_data[1]
-            
-            if tab == "cox":
-                data["test_summary"] = cox_data[2]
-                
-            result["data"] = data
+            result["data"] = new_aft.get_aft_cox_img_data(tab, cancer_category, type, feature, cgcite, survival_type, drop_image_columns)
+            print(result["data"]["data columns"])
         except Exception as e:
             print(traceback.format_exc())
             result["status"] = "error"
@@ -766,7 +761,7 @@ class AftPlotDownloadView(APIView):
         survival_type = request.GET['survival_type']
 
         print("@data =", cancer_category, cancer_type,
-              meta_feature, survival_type)
+              meta_feature, cgcite, survival_type)
 
         download_dir = 'download' + os.sep
         if not os.path.exists(download_dir):
@@ -892,13 +887,14 @@ class TwoGeneView(APIView):
             #time = request.GET.get('time','0')
             print("category1 %s, category2 %s, cancer_type %s, gene1 %s, gene2 %s, group1 %s, group1 %s"\
                 % (category1, category2, cancer_type, gene1, gene2, group1, group2))
-            two_gene = TwoGene()
+            kmplotter = Kmplotter()
             data = {
-                "d": two_gene.get_data(category1, category2, gene1, gene2, cancer_type, group1, group2),
+                "d": kmplotter.get_two_gene_data(category1, category2, gene1, gene2, cancer_type, group1, group2),
                 "total": 4
             }
             result["data"] = data
         except Exception as e:
+            print(traceback.format_exc())
             result["status"] = "error"
             result["message"] = str(e)
 
@@ -916,8 +912,8 @@ class TwoGeneImgView(APIView):
             gene1 = request.GET['gene1']
             gene2 = request.GET['gene2']
             cancer_type = request.GET['type']
-            group1 = request.GET['group1']
-            group2 = request.GET['group2']
+            group1 = request.GET['group1'].split(",")
+            group2 = request.GET['group2'].split(",")
             time = request.GET.get('time', '0')
 
             print("@p =", category2, mode, cancer_type,
@@ -934,8 +930,8 @@ class TwoGeneImgView(APIView):
             elif mode == 'Disease-Specific':
                 mode = 'DSS'
             print('~~~~~~~~~~~~')
-            resp = json.loads(subprocess.check_output(
-                ['python', path + 'call_two_gene.py', category1, category2, mode, gene1, gene2, cancer_type, group1, group2, time]).decode('utf-8'))
+            kmplotter = Kmplotter()
+            resp = kmplotter.get_two_gene_img_data(category1, category2, mode, gene1, gene2, cancer_type, group1, group2, time)
             # jand 因為可能有 group 沒資料的 warning
             if resp['status'] == 'SUCCESS':
                 resp_message = {
@@ -969,8 +965,8 @@ class TwoGeneDownloadView(APIView):
         gene1 = request.GET['gene1']
         gene2 = request.GET['gene2']
         cancer_type = request.GET['type']
-        group1 = request.GET['group1']
-        group2 = request.GET['group2']
+        group1 = request.GET['group1'].split(",")
+        group2 = request.GET['group2'].split(",")
 
 
 
@@ -987,9 +983,8 @@ class TwoGeneDownloadView(APIView):
         elif mode == 'Disease-Specific':
             mode = 'DSS'
 
-        two_gene = TwoGene()
-        data = two_gene.get_download_data(
-            category1, category2, mode, gene1, gene2, cancer_type, group1, group2)
+        kmplotter = Kmplotter()
+        data = kmplotter.get_download_two_gene_data(category1, category2, mode, gene1, gene2, cancer_type, group1, group2)
         if gene1.find("|") != -1:
             gene1 = gene1.split("|")[0]
         elif gene1.find(",") != -1:
@@ -1025,17 +1020,11 @@ class CoxTwoGeneView(APIView):
             gene2 = request.GET['gene2']
             tab = request.GET.get('tab', "cox")
 
-            two_gene = CoxAftTwoGene()
-            if tab == 'aft':
-                data = {
-                    "d": two_gene.get_aft_data(category1, category2, gene1, gene2, cancer_type),
-                    "total": 4
-                }
-            else:
-                data = {
-                    "d": two_gene.get_cox_data(category1, category2, gene1, gene2, cancer_type),
-                    "total": 4
-                }
+            newaft = NewAft()
+            data = {
+                "d": newaft.get_two_gene_data(tab, category1, category2, gene1, gene2, cancer_type),
+                "total": 4
+            }
             result["data"] = data
         except Exception as e:
             result["status"] = "error"
@@ -1068,94 +1057,89 @@ class CoxTwoGeneImgView(APIView):
                 mode = 'PFI'
             elif mode == 'Disease-Specific':
                 mode = 'DSS'
-
-            two_gene = CoxAftTwoGene()
-            data = {}
-            if tab == "cox":
-                tmp = two_gene.get_cox_img(
-                    mode, category1, category2, gene1, gene2, cancer_type, drop_image_columns)
-                data["img"] = tmp[0]
-                data["summary"] = tmp[1]
-                data["test_summary"] = tmp[2]
-            elif tab == "aft":
-                tmp = two_gene.get_aft_img(
-                    mode, category1, category2, gene1, gene2, cancer_type, drop_image_columns)
-                data["img"] = tmp[0]
-                data["summary"] = (tmp[1])
-            else:
-                data["img"] = ""
-                data["summary"] = []
-            result["data"] = data
+            
+            newaft = NewAft()
+            result["data"] = newaft.get_two_gene_img_data(
+                tab, 
+                mode, 
+                category1, 
+                category2, 
+                gene1, 
+                gene2, 
+                cancer_type, 
+                drop_image_columns
+            )
         except Exception as e:
+            print(traceback.format_exc())
             result["status"] = "error"
             result["message"] = str(e)
 
         return JsonResponse(result)
 
-class CoxTwoGeneUploadView(APIView):
-    def post(self, request, *args, **kwargs):
-        result = {
-            "status": "success"
-        }
+# class CoxTwoGeneUploadView(APIView):
+#     def post(self, request, *args, **kwargs):
+#         result = {
+#             "status": "success"
+#         }
 
-        # create folder if not exist
-        folder = 'uploads'
-        if not os.path.isdir(folder):
-            os.mkdir(folder)
-        fname = ""
+#         # create folder if not exist
+#         folder = 'uploads'
+#         if not os.path.isdir(folder):
+#             os.mkdir(folder)
+#         fname = ""
 
-        try:
-            upload_file = request.FILES['upload_file']
-            category1 = request.POST['category1']
-            category2 = request.POST['category2']
-            cancer_type = request.POST['type']
-            gene1 = request.POST['gene1']
-            gene2 = request.POST['gene2']
-            mode = request.POST['mode']
-            tab = request.POST['tab']
+#         try:
+#             upload_file = request.FILES['upload_file']
+#             category1 = request.POST['category1']
+#             category2 = request.POST['category2']
+#             cancer_type = request.POST['type']
+#             gene1 = request.POST['gene1']
+#             gene2 = request.POST['gene2']
+#             mode = request.POST['mode']
+#             tab = request.POST['tab']
 
-            if upload_file.size > (1000 * 1024):
-                raise Exception("File too large")
+#             if upload_file.size > (1000 * 1024):
+#                 raise Exception("File too large")
 
-            fss = FileSystemStorage()
-            fname = str(datetime.datetime.now().strftime('%Y%m%d%H%M%S')) + "_" + upload_file.name
-            file = fss.save(folder + "/" + fname, upload_file)
+#             fss = FileSystemStorage()
+#             fname = str(datetime.datetime.now().strftime('%Y%m%d%H%M%S')) + "_" + upload_file.name
+#             file = fss.save(folder + "/" + fname, upload_file)
 
-            if mode == 'Overall':
-                mode = 'OS'
-            elif mode == 'Disease-Free':
-                mode = 'DFI'
-            elif mode == 'Progression-Free':
-                mode = 'PFI'
-            elif mode == 'Disease-Specific':
-                mode = 'DSS'
+#             if mode == 'Overall':
+#                 mode = 'OS'
+#             elif mode == 'Disease-Free':
+#                 mode = 'DFI'
+#             elif mode == 'Progression-Free':
+#                 mode = 'PFI'
+#             elif mode == 'Disease-Specific':
+#                 mode = 'DSS'
 
-            two_gene = CoxAftTwoGene()
-            data = {}
-            if tab == "cox":
-                tmp = two_gene.get_cox_upload_img(
-                    mode, category1, category2, gene1, gene2, cancer_type, folder + "/" + fname)
-                data["img"] = tmp[0]
-                data["summary"] = tmp[1]
-                data["test_summary"] = tmp[2]
-            elif tab == "aft":
-                tmp = two_gene.get_aft_upload_img(
-                    mode, category1, category2, gene1, gene2, cancer_type, folder + "/" + fname)
-                data["img"] = tmp[0]
-                data["summary"] = (tmp[1])
-            else:
-                data["img"] = ""
-                data["summary"] = []
-            result["data"] = data
-        except Exception as e:
-            result["status"] = "error"
-            result["message"] = str(e)
+#             two_gene = CoxAftTwoGene()
+#             data = {}
+#             if tab == "cox":
+#                 tmp = two_gene.get_cox_upload_img(
+#                     mode, category1, category2, gene1, gene2, cancer_type, folder + "/" + fname)
+#                 data["img"] = tmp[0]
+#                 data["summary"] = tmp[1]
+#                 data["test_summary"] = tmp[2]
+#             elif tab == "aft":
+#                 tmp = two_gene.get_aft_upload_img(
+#                     mode, category1, category2, gene1, gene2, cancer_type, folder + "/" + fname)
+#                 data["img"] = tmp[0]
+#                 data["summary"] = (tmp[1])
+#             else:
+#                 data["img"] = ""
+#                 data["summary"] = []
+#             result["data"] = data
+#         except Exception as e:
+#             result["status"] = "error"
+#             result["message"] = str(e)
 
-        # remove not used file
-        if fname != "" and os.path.exists(folder + "/" + fname):
-            os.remove(folder + "/" + fname)
+#         # remove not used file
+#         if fname != "" and os.path.exists(folder + "/" + fname):
+#             os.remove(folder + "/" + fname)
 
-        return JsonResponse(result)
+#         return JsonResponse(result)
 
 class CoxTwoGeneDownloadView(APIView):
     def get(self, request, *args, **kwargs):
@@ -1181,13 +1165,16 @@ class CoxTwoGeneDownloadView(APIView):
         elif mode == 'Disease-Specific':
             mode = 'DSS'
 
-        two_gene = CoxAftTwoGene()
-        if tab == "cox":
-            data = two_gene.get_cox_download_data(
-                mode, category1, category2, gene1, gene2, cancer_type)
-        elif tab == "aft":
-            data = two_gene.get_aft_download_data(
-                mode, category1, category2, gene1, gene2, cancer_type)
+        newaft = NewAft()
+        data = newaft.get_two_gene_download_data(
+            mode, 
+            category1, 
+            category2, 
+            gene1, 
+            gene2, 
+            cancer_type
+        )
+        
         if gene1.find("|") != -1:
             gene1 = gene1.split("|")[0]
         elif gene1.find(",") != -1:
@@ -1226,20 +1213,21 @@ class MoreGeneView(APIView):
                 raise Exception("No genes value")
             print(cancer_type, tab, gene_mrnas, gene_mirnas, gene_lncrnas)
 
-            more_gene = MoreGene()
             data = {}
-            if tab == "aft":
-                data = {
-                    "d": more_gene.get_aft_data(cancer_type, gene_mrnas, gene_mirnas, gene_lncrnas),
-                    "total": 4
-                }
-            else:
-                data = {
-                    "d": more_gene.get_cox_data(cancer_type, gene_mrnas, gene_mirnas, gene_lncrnas),
+            newaft = NewAft()
+            data = {
+                    "d": newaft.get_more_gene_data(
+                        tab,
+                        cancer_type, 
+                        gene_mrnas, 
+                        gene_mirnas, 
+                        gene_lncrnas
+                        ),
                     "total": 4
                 }
             result["data"] = data
         except Exception as e:
+            print(traceback.format_exc())
             result["status"] = "error"
             result["message"] = str(e)
 
@@ -1265,19 +1253,12 @@ class MoreGeneImgView(APIView):
             print(cancer_type, tab, gene_mrnas, gene_mirnas, gene_lncrnas)
 
             data = {}
-            more_gene = MoreGene()
-            if tab == "aft":
-                tmp_data = more_gene.get_aft_img_data(cancer_type, mode, gene_mrnas, gene_mirnas, gene_lncrnas, drop_image_columns)
-                data["img"] = tmp_data[0]
-                data["summary"] = tmp_data[1]
-            else:
-                tmp_data = more_gene.get_cox_img_data(cancer_type, mode, gene_mrnas, gene_mirnas, gene_lncrnas, drop_image_columns)
-                data["img"] = tmp_data[0]
-                data["summary"] = tmp_data[1]
-                data["test_summary"] = tmp_data[2]
+            
+            newaft = NewAft()
+            result["data"] = newaft.get_more_gene_img_data(tab, cancer_type, mode, gene_mrnas, gene_mirnas, gene_lncrnas, drop_image_columns)
 
-            result["data"] = data
         except Exception as e:
+            print(traceback.format_exc())
             result["status"] = "error"
             result["message"] = str(e)
 
@@ -1358,8 +1339,8 @@ class MoreGeneDownloadView(APIView):
         if not os.path.exists(download_dir):
             os.makedirs(download_dir)
 
-        more_gene = MoreGene()
-        data = more_gene.get_download_data(cancer_type, mode, gene_mrnas, gene_mirnas, gene_lncrnas)
+        newaft = NewAft()
+        data = newaft.get_more_gene_download_data(cancer_type, mode, gene_mrnas, gene_mirnas, gene_lncrnas)
 
         data.to_csv(download_dir + "more_gene.csv",
                     index=False, encoding='utf-8')
@@ -1558,8 +1539,6 @@ class UpLoadSurvivalChartView(APIView):
             file = request.FILES.get("file")
             df = pd.read_csv(BytesIO(file.read()))[[expression_col, day_col, status_col]]
         
-            print(df)
-            
             # auto select cutoff
             if H_per == "" and L_per == "":
                 L_per, H_per = mp_get_logrank_beast_hper_lper(df, expression_col, status_col, day_col, time)
@@ -1573,16 +1552,19 @@ class UpLoadSurvivalChartView(APIView):
             resp = kmplotter.get_mkpolt(df, expression_col, status_col, day_col, time, L_per, H_per)
             
             if resp["status"] != 'success':
-                raise Exception(resp["message"])
+                raise Exception("A column with a continuous variable is expected.\nError: " + resp["message"])
             
             result["data"] = {
                 'chart_data': resp["chart_data"],
                 'H_per': H_per,
                 'L_per': L_per,
                 }
+        except ValueError as e:
+            result["status"] = "error"
+            result["message"] = "A column with a continuous variable is expected.\nError: " + str(e)
         except Exception as e:
             result["status"] = "error"
-            result["message"] = str(e)
+            result["message"] = "請確認上傳的資料是否正確與選擇正確的columns\n" + type(e).__name__  + ":" + str(e)
             
         return JsonResponse(result, safe=False)
 
@@ -1625,7 +1607,7 @@ class UpLoadSurvivalCoxView(APIView):
                 
                 if col_class == "continuous":
                     df[col_exp] = pd.to_numeric(df[col_exp])
-                elif col_class == "category":
+                elif col_class == "categorical":
                     base_val = expression_col_base_list[i]
                     
                     temp_df = pd.get_dummies(df[col_exp]).apply(pd.to_numeric)
@@ -1642,17 +1624,11 @@ class UpLoadSurvivalCoxView(APIView):
             n = len(df)
             plt_title = 'Hazard Ratio Plot (status=%s, day=%s, n=%s)' % (status_col, day_col, n)
             new_aft = NewAft()
-            cox_data = new_aft.aft_cox_img("cox", df, day_col, status_col, plt_title)
+            result["data"] = new_aft.aft_cox_img("cox", df, day_col, status_col, plt_title)
             
-            data = {}
-            data["img"] = cox_data[0]
-            data["summary"] = cox_data[1]
-            data["test_summary"] = cox_data[2]
-            
-            result["data"] = data
         except Exception as e:
             result["status"] = "error"
-            result["message"] = str(e)
+            result["message"] = "請確認上傳的資料是否正確與選擇正確的columns\nError: " + str(e)
         return JsonResponse(result, safe=False)
 
 from lifelines import LogNormalAFTFitter
@@ -1688,7 +1664,7 @@ class UpLoadSurvivalAftView(APIView):
                 
                 if col_class == "continuous":
                     df[col_exp] = pd.to_numeric(df[col_exp])
-                elif col_class == "category":
+                elif col_class == "categorical":
                     base_val = expression_col_base_list[i]
                     
                     temp_df = pd.get_dummies(df[col_exp]).apply(pd.to_numeric)
@@ -1705,35 +1681,41 @@ class UpLoadSurvivalAftView(APIView):
             n = len(df)
             plt_title = 'Hazard Ratio Plot (status=%s, day=%s, n=%s)' % (status_col, day_col, n)
             new_aft = NewAft()
-            cox_data = new_aft.aft_cox_img("cox", df, day_col, status_col, plt_title)
+            result["data"] = new_aft.aft_cox_img("aft", df, day_col, status_col, plt_title)
             
-            data = {}
-            data["img"] = cox_data[0]
-            data["summary"] = cox_data[1]
+        except Exception as e:
+            result["status"] = "error"
+            result["message"] = "請確認上傳的資料是否正確與選擇正確的columns\nError: " + str(e)
+        return JsonResponse(result)
+    
+class UpLoadGetColView(APIView):
+    def post(self, request, *args, **kwargs):
+        result = {
+            'status' : 'success'
+        }
+        try:
+            file = request.FILES['file']
+            _, extension = os.path.splitext(file.name)
+            if extension in [".txt", ".tsv"]:
+                df = pd.read_csv(BytesIO(file.read()), sep="\t")
+            elif extension == ".csv":
+                df = pd.read_csv(BytesIO(file.read()))
+            else:
+                raise "The file must have a csv, txt, or tsv extension."
+
+            col_list = list(df.columns)
+            data = {
+                'col': col_list,
+            }
+            
+            for col in col_list:
+                data[col] = list(set(df[col].fillna("#NULL").to_list()))
             
             result["data"] = data
         except Exception as e:
             result["status"] = "error"
             result["message"] = str(e)
-        return JsonResponse(result, safe=False)
-
-class UpLoadGetColView(APIView):
-    def post(self, request, *args, **kwargs):
-        file = request.FILES['file']
-        df = pd.read_csv(BytesIO(file.read()))
-        
-        col_list = list(df.columns)
-        data = {
-            'col': col_list,
-        }
-        
-        for col in col_list:
-            data[col] = list(set(df[col].fillna("#NULL").to_list()))
-        
-        result = {
-            "status": "success",
-            "data": data
-        }
+            
         return JsonResponse(result)
         
 def upload_data(request):
@@ -1741,6 +1723,15 @@ def upload_data(request):
         "path_info": request.META['PATH_INFO']
     })
 
+class DownloadDemoData(APIView):
+    def get(self, request, *args, **kwargs):
+        with open("python_nctu_cancer/Supplemental/HNSC_Fibronectin_os_L50_173.csv", 'rb') as fh:
+            response = HttpResponse(
+                fh.read(), content_type="application/vnd.ms-excel")
+            response['Content-Disposition'] = 'inline; filename=' + \
+                os.path.basename("python_nctu_cancer/Supplemental/HNSC_Fibronectin_os_L50_173.csv")
+            return response
+        
 class TestView(APIView):
     def post(self, request, *args, **kwargs):
         result = {

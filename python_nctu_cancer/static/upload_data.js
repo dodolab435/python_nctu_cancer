@@ -26,6 +26,11 @@ $(function () {
     });
 })
 
+
+function downloadDemoData() {
+    window.open(rootUrl + '/api/download_demodata');
+}
+
 function chgChartTime(isModal) {
     startLoading();
     // $("#cox_aft_div").hide();
@@ -142,7 +147,12 @@ function chgChartTime(isModal) {
 
 $(document).ready(function() {
     $('#day_col, #status_col').on("change", function () {
-        console.log($(this).val());
+        $("#gene_expression_logrank_div").children("label").show();
+        $("#gene_expression_coxaft_div").children("label").show();
+        var select_str = "input[value='" + $("#day_col").val() + "']";
+        $(select_str).parent("label").hide();
+        var select_str = "input[value='" + $("#status_col").val() + "']";
+        $(select_str).parent("label").hide();
     });
     
 
@@ -169,59 +179,64 @@ $(document).ready(function() {
         var formData = new FormData();
         formData.append('file', $('#input-file')[0].files[0]);
         $.ajax({
-        url: rootUrl + '/api/upload_data_get_col',
-        type: 'POST',
-        data: formData,
-        processData: false,
-        contentType: false,
-        complete: function (data, textStatus, jqXHR) {
-            stopLoading();
-        },
-        success: function(data) {
-            file_col_name = data['data']['col']
-            $("#col_select_div").show();
-            $('#day_col').html("");
-            $('#status_col').html("");
-            $('#gene_expression_logrank_div').html("");
-            $('#gene_expression_coxaft_div').html("");
-            for (let i = 0; i < file_col_name.length; i++) {
-                $('#day_col').append($('<option>').val(file_col_name[i]).text(file_col_name[i]));
-                $('#status_col').append($('<option>').val(file_col_name[i]).text(file_col_name[i]));
-                $('#gene_expression_logrank_div').append("<label><input type='radio' name='gene_expression_col' value='" + file_col_name[i] + "'/>&nbsp;" + file_col_name[i] + "</label><br>");
-                s = "<label class='fontNoBold'><input type='checkbox' name='gene_expression_col' value='" + file_col_name[i] + "'/>&nbsp;";
-                s += "<label>";
-                s += file_col_name[i];
-                s += "</label>";
-                s += " is ";
-                s += "<select name='col_class'></select>";
-                s += "<label class='category_div fontNoBold' hidden>";
-                s += "&nbsp;and ";
-                s += "<select name='base_val'>"
-                for (let k = 0; k < data['data'][file_col_name[i]].length; k++) {
-                    s += "<option value='" + data['data'][file_col_name[i]][k] + "'>" + data['data'][file_col_name[i]][k] + "</option>"
+            url: rootUrl + '/api/upload_data_get_col',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            dataType: 'json',
+            complete: function (data, textStatus, jqXHR) {
+                stopLoading();
+            },
+            success: function(data) {
+                console.log(data)
+                file_col_name = data['data']['col']
+                $("#col_select_div").show();
+                $('#day_col').html("");
+                $('#status_col').html("");
+                $('#gene_expression_logrank_div').html("");
+                $('#gene_expression_coxaft_div').html("");
+                for (let i = 0; i < file_col_name.length; i++) {
+                    $('#day_col').append($('<option>').val(file_col_name[i]).text(file_col_name[i]));
+                    $('#status_col').append($('<option>').val(file_col_name[i]).text(file_col_name[i]));
+                    $('#gene_expression_logrank_div').append("<label class='selectLabel'><input type='radio' name='gene_expression_col' value='" + file_col_name[i] + "'/>&nbsp;" + file_col_name[i] + "</label>");
+                    s = "<label class='fontNoBold selectLabel'><input type='checkbox' name='gene_expression_col' value='" + file_col_name[i] + "'/>&nbsp;";
+                    s += "<label>";
+                    s += file_col_name[i];
+                    s += "</label>";
+                    s += " is ";
+                    s += "<select name='col_class'></select>";
+                    s += "<label class='category_div fontNoBold' hidden>";
+                    s += "&nbsp;and ";
+                    s += "<select name='base_val'>"
+                    for (let k = 0; k < data['data'][file_col_name[i]].length; k++) {
+                        s += "<option value='" + data['data'][file_col_name[i]][k] + "'>" + data['data'][file_col_name[i]][k] + "</option>"
+                    }
+                    s += "</select>"
+                    s += " is the reference";
+                    s += "</label>"
+                    s += "</label>"
+                    $('#gene_expression_coxaft_div').append(s);
                 }
-                s += "</select>"
-                s += " is the reference";
-                s += "</label>"
-                s += "</label><br>"
-                $('#gene_expression_coxaft_div').append(s);
+                $("select[name='col_class']").each(function() {
+                    $(this).html("<option value='continuous'>Continuous</option>\
+                                <option value='categorical'>Categorical</option>");
+                });
+                $("#select_a").change();
+                $("select[name='col_class']").on("change", function () {
+                    if ($(this).val() == "categorical"){
+                        $(this).siblings(".category_div").show();
+                    }else{
+                        $(this).siblings(".category_div").hide();
+                    }
+                });
+                $("#status_col").change();
+            },
+            error: function(xhr, status, error) {
+                console.log(status, error);
+                alert("Error: " + error);
+                    
             }
-            $("select[name='col_class']").each(function() {
-                $(this).html("<option value='continuous'>Continuous</option>\
-                              <option value='category'>Category</option>");
-            });
-            $("#select_a").change();
-            $("select[name='col_class']").on("change", function () {
-                if ($(this).val() == "category"){
-                    $(this).siblings(".category_div").show();
-                }else{
-                    $(this).siblings(".category_div").hide();
-                }
-            });
-        },
-        error: function(xhr, status, error) {
-            console.log(error);
-        }
         });
     });
 });

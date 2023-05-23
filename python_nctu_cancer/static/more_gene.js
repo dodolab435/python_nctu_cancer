@@ -289,7 +289,7 @@ function retrieveData(url, aoData, fnCallback) {
         success: function (result, textStatus, jqXHR) {
             if (result.status == 'success') {
                 MY_DATA.allData = result.data["d"];
-
+                console.log(MY_DATA.allData)
                 var data = getCallbackData(result.data, MY_DATA.selectedCategory2, MY_DATA.selectedCancerType, subTab);
                 fnCallback(data, MY_DATA.selectedCategory2, MY_DATA.selectedCancerType, subTab); // 把返回的數據傳給這個方法就可以了,datatable會自動綁定數據的
             } else {
@@ -329,9 +329,13 @@ function getCallbackData(data, category, type, subTab) {
         var d = [mode, patients], gene_name;
         for (let i = 0; i < genes.length; i ++) {
             gene_name = genes[i];
+            
             if (data[gene_name]) {
                 d.push(data[gene_name]["coef"]);
                 d.push(data[gene_name]["p"]);
+            } else if (data[gene_name + ": mu_"]) {
+                d.push(data[gene_name + ": mu_"]["coef"]);
+                d.push(data[gene_name + ": mu_"]["p"]);
             } else {
                 console.log("not found " + gene_name)
                 d.push("-");

@@ -1,6 +1,10 @@
 // hide chart
 $('.shiny-plot-output').hide();
 
+$("#nav-gene").on("click", function () {
+    $('.shiny-plot-output').hide();
+});
+
 $("[name='chart_height'], [name='chart_width']").on("change", function () {
     if (! $('#chart-option').is(':hidden') || ! $('#chart-option-browse-modal').is(':hidden')){
         showChart();
@@ -35,9 +39,11 @@ function downloadPdf(isModal) {
             $chart = $("#chart");
         }
         // 應該要讓他輸入大小
-        Plotly.toImage(chartDivId, {format: "png", width: $chart.width(), height: $chart.height()}).then(function(png) {
+        Plotly.toImage(chartDivId, {format: "png", width: $chart.width(), height: $chart.height(), scale: 4}).then(function(png) {
             // create a jsPDF object
-            var doc = new jsPDF();
+            var doc = new jsPDF({
+                dpi: 3000
+            });
         
             // add the PNG image to the PDF document using addImage() method
             doc.addImage(png, 'PNG', 0, 0, doc.internal.pageSize.getWidth(), doc.internal.pageSize.getWidth() * (parseInt($chart.height()) / parseInt($chart.width())));
@@ -51,7 +57,9 @@ function downloadPdf(isModal) {
         }else{
             $chart = $("#chart-cox .aftImg");
         }
-        var doc = new jsPDF();
+        var doc = new jsPDF({
+            dpi: 300
+        });
 
         // Add the image to the PDF document
         doc.addImage($chart.attr("src"), "JPEG", 0, 0, doc.internal.pageSize.getWidth(), doc.internal.pageSize.getWidth() * (parseInt($chart.height()) / parseInt($chart.width())));
@@ -201,13 +209,15 @@ function showChart() {
         MY_DATA.chartJsonResult["chart_data"][0]["chart1_data"][1]["line"]["color"] = $('.chart-option-color1').eq(chartIndex).val();
         MY_DATA.chartJsonResult["chart_data"][0]["chart1_data"][1]["line"]["width"] = $('.chart-option-width1').eq(chartIndex).val();
         MY_DATA.chartJsonResult["chart_data"][0]["chart1_data"][2]["marker"]["color"] = $('.chart-option-marker-color1').eq(chartIndex).val();
+        MY_DATA.chartJsonResult["chart_data"][0]["chart1_data"][3]["marker"]["color"] = $('.chart-option-marker-color1').eq(chartIndex).val();
         
 
-        MY_DATA.chartJsonResult["chart_data"][0]["chart1_data"][3]["line"]["color"] = $('.chart-option-color2').eq(chartIndex).val();
-        MY_DATA.chartJsonResult["chart_data"][0]["chart1_data"][3]["line"]["width"] = $('.chart-option-width2').eq(chartIndex).val();
         MY_DATA.chartJsonResult["chart_data"][0]["chart1_data"][4]["line"]["color"] = $('.chart-option-color2').eq(chartIndex).val();
         MY_DATA.chartJsonResult["chart_data"][0]["chart1_data"][4]["line"]["width"] = $('.chart-option-width2').eq(chartIndex).val();
-        MY_DATA.chartJsonResult["chart_data"][0]["chart1_data"][5]["marker"]["color"] = $('.chart-option-marker-color2').eq(chartIndex).val();
+        MY_DATA.chartJsonResult["chart_data"][0]["chart1_data"][5]["line"]["color"] = $('.chart-option-color2').eq(chartIndex).val();
+        MY_DATA.chartJsonResult["chart_data"][0]["chart1_data"][5]["line"]["width"] = $('.chart-option-width2').eq(chartIndex).val();
+        MY_DATA.chartJsonResult["chart_data"][0]["chart1_data"][6]["marker"]["color"] = $('.chart-option-marker-color2').eq(chartIndex).val();
+        MY_DATA.chartJsonResult["chart_data"][0]["chart1_data"][7]["marker"]["color"] = $('.chart-option-marker-color2').eq(chartIndex).val();
     }
     var chart1_data = MY_DATA.chartJsonResult["chart_data"][0].chart1_data;
     var chart_layout = MY_DATA.chartJsonResult["chart_data"][0].layout;
@@ -216,8 +226,9 @@ function showChart() {
     $chart.html("").show();
     
     Plotly.newPlot(divId, chart1_data, chart_layout || {});
-
-    addChartDownloadButton($chart);
+    if ($('#input-file').length == 0) {
+        addChartDownloadButton($chart);
+    }
 }
 
 /**
@@ -290,7 +301,7 @@ function showImgTable($chart, tab) {
 
         htmls.push('</table>');
     }
-    htmls.push('<div>*HR : Hazard ratio, TR : Time ratio</div>');
+    htmls.push('<div>*HR : Hazard ratio, TR : time ratio</div>');
     htmls.push('</div>');
     htmls.push('</div>');
     $chart.show();
@@ -305,40 +316,40 @@ function addAftChartDownloadButton($chart, category, type, feature, cgcite, surv
 function _settingSelectColumns($chartObj) {
     let htmls = [], tmpKeys = [], key, i;
 
-        for (key in MY_DATA.chartData["data"]["summary"]) {
-            tmpKeys.push(key);
+    for (i = 0; i < MY_DATA.chartData["data"]["data columns"].length; i ++) {
+        tmpKeys.push(MY_DATA.chartData["data"]["data columns"][i]);
+    }
+    
+    htmls.push('<div>Remove features&emsp;');
+    for (i = 0; i < tmpKeys.length; i ++) {
+        if (tmpKeys[i] == "Intercept") {
+            continue;
         }
-        
-        htmls.push('<div>Remove features&emsp;');
-        for (i = 0; i < tmpKeys.length; i ++) {
-            if (tmpKeys[i] == "Intercept") {
-                continue;
-            }
-            htmls.push('<label><input type="checkbox" name="img_checkbox" value="' + tmpKeys[i] + '" checked="checked" /> ' + tmpKeys[i] + '</label>&emsp;');
-        }
-        htmls.push('<button class="btn btn-default btn-sm" type="button">Calculate</button>');
-        htmls.push('</div>');
-        htmls.push('<br>');
-        // upload custom excel html
-        htmls.push('<div>');
-        htmls.push('<input type="file" name="upload_file" class="cox_aft_file" accept=".csv" style="display: none;" />');
-        htmls.push('<span class="temp_file_text"></span>');
-        // htmls.push('<input type="button" class="select_file" value="Select file" />&emsp;');
-        // htmls.push('<input type="button" class="csv_upload" value="Upload & reanalyze" />&emsp;');
-        isModal = $("#chart-cox-modal").length && !$("#chart-cox-modal").is(':hidden')
-        htmls.push('<input type="button" value="Download PDF" onclick="downloadPdf(' + isModal + ')" />');
-        htmls.push('</div>');
+        htmls.push('<label><input type="checkbox" name="img_checkbox" value="' + tmpKeys[i] + '" checked="checked" /> ' + tmpKeys[i] + '</label>&emsp;');
+    }
+    htmls.push('<button class="btn btn-default btn-sm" type="button">Calculate</button>');
+    htmls.push('</div>');
+    htmls.push('<br>');
+    // upload custom excel html
+    htmls.push('<div>');
+    htmls.push('<input type="file" name="upload_file" class="cox_aft_file" accept=".csv" style="display: none;" />');
+    htmls.push('<span class="temp_file_text"></span>');
+    // htmls.push('<input type="button" class="select_file" value="Select file" />&emsp;');
+    // htmls.push('<input type="button" class="csv_upload" value="Upload & reanalyze" />&emsp;');
+    isModal = $("#chart-cox-modal").length && !$("#chart-cox-modal").is(':hidden')
+    htmls.push('<input type="button" value="Download PDF" onclick="downloadPdf(' + isModal + ')" />');
+    htmls.push('</div>');
 
-        $chartObj.show();
-        $chartObj.html(htmls.join(''));
-        
-        // listening trigger file
-        $chartObj.find('.select_file').on('click', function() {
-            $chartObj.find('.cox_aft_file').trigger("click");
-        });
-        $chartObj.find('.cox_aft_file').on('change', function() {
-            $chartObj.find('.temp_file_text').html($(this).val());
-        });
+    $chartObj.show();
+    $chartObj.html(htmls.join(''));
+    
+    // listening trigger file
+    $chartObj.find('.select_file').on('click', function() {
+        $chartObj.find('.cox_aft_file').trigger("click");
+    });
+    $chartObj.find('.cox_aft_file').on('change', function() {
+        $chartObj.find('.temp_file_text').html($(this).val());
+    });
 }
 
 /**
@@ -385,7 +396,9 @@ function drawNewAftChart(category, tab, type, feature, cgcite, survivalType, ign
 
                 if (ignore !== 1) {
                     _showSelectColumns($chart2);
-                    addAftChartDownloadButton($chart2, category, type, feature, cgcite, survivalType);
+                    if ($('#input-file').length == 0) {
+                        addAftChartDownloadButton($chart2, category, type, feature, cgcite, survivalType);
+                    }
                 }
 
             } else {
