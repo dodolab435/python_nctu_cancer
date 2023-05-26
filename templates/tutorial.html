@@ -36,22 +36,28 @@
                         <a>More than Two Genes (>2 genes)</a>
                      </li>
                   </ul>
+                  <b>Analyze your data</b>
+                  <ul id="analyze_your_data">
+                     <li>
+                        <a>Analyze your data</a>
+                     </li>
+                  </ul>
                   <b>Statistics Analysis</b>
                   <ul id="overviewBrowse">
                      <li>
                         <a id="log_rank_test">Log-Rank test</a>
                      </li>
                      <li>
-                        <a>Cox regression</a>
+                        <a id="cox_regression">Cox regression</a>
                      </li>
                      <li>
-                        <a>Accelerated Failure-Time model</a>
+                        <a id="aft_model">Accelerated Failure-Time model</a>
                      </li>
                      <li>
                         <a id="exp_methylation">Expression/methyaltion profiles</a>
                      </li>
                      <li>
-                        <a>The correlation of mRNA & methylation</a>
+                        <a id="mrna_methylation">The correlation of mRNA & methylation</a>
                      </li>
                   </ul>
                   <b>About</b>
@@ -59,20 +65,18 @@
                      <li>
                         <a>Download Data</a>
                      </li>
+                     
                      <li>
-                        <a>Upload Data</a>
+                        <a href="/statistics">Statistics</a>
                      </li>
-                     <li>
-                        <a href="http://dosurvive.lab.nycu.edu.tw/statistics">Statistics</a>
-                     </li>
-                     <li><a href="http://dosurvive.lab.nycu.edu.tw/faq">FAQ</a></li>
+                     <li><a href="/faq">FAQ</a></li>
                   </ul>
                </td>
                <td style="padding: 10px">
                   <!--Overview of DoSurvive-->
                   <div class="tutorialPage">
                      <div style="color: black; font-size: 15px;  padding-bottom: 2px;">
-                        DoSurvival is a web-based database for survival analysis, DoSurvive provides three
+                        DoSurvival is a webserver and a database for survival analysis, DoSurvive provides three
                         survival analysis method: the 
                         <span style="color:#0080FF;">log-rank test</span>
                         , the 
@@ -92,80 +96,71 @@
                            <li>Gene expression level in normal and tumor samples</li>
                            <li>CpG site & mRNA correlation in cancer</li>
                            <li><span style="font-weight:bold; color:#0080FF;">Combined Effects, allow users to observe the relationship between multiple genes and survival, which is an innovative method by DoSurvival.</span></li>
+                           <li><span style="color:#0080FF;">'Analyze your data'</span>, allows users to perform univariate/multivariant survival analysis with Log-rank test, Cox proportional hazard model or Accelerated Failure-Time model.</li>
                         </ol>
                         <div style="text-align: center;">
                            <img src="static/images/DoSurvive_dodo (1).png" style="width: 80%;" />
                         </div>
                      </div>
                   </div>
+
                   <!--Select cancer & gene-->
                   <div class="tutorialPage" style="display: none;">
                      <div style="color: red; font-size: 20px; font-weight: bold; padding-bottom: 5px;">
-                        Select a Cancer & a Gene</div>
+                        Select a Cancer & a Gene
+                     </div>
 
-                        <div style="color: black; font-size: 15px;  padding-bottom: 2px;">
-                           A user who is interested in a specific cancer and a specific target feature can mouseover "Browse Database" and
-                           then go to "Select Cancer & Gene" to browse the database.<br><br>
-                           Step 1. Select a molecular type of interest from the list (red box shown below).
-                           <br>
-                           <div>
-                              <img src="static/images/do1.PNG" style="width: 80%; border:2px #ccc solid;padding:5px;"><br>
-                              <!--<img src="static/images/tutorial_figure1.png" style="width: 80% border:2px #ccc solid;padding:5" />-->
-                           </div>
-                           <br>
+                     <div style="color: black; font-size: 15px;  padding-bottom: 2px;">
+                        A user who is interested in a specific cancer and a specific target feature can mouseover "Browse Database" and
+                        then go to "Select Cancer & Gene" to browse the database.<br><br>
+                        Step 1. Select a molecular type of interest from the list (red box shown below).
+                        <br>
+                        <div>
+                           <img src="static/images/tutorial/cancer_gene_1.png" style="width: 80%; border:2px #ccc solid;padding:5px;"><br>
                         </div>
-                        <div style="color: black; font-size: 15px;  padding-bottom: 2px;">
-                           Step 2. Choose the cancer type of interest from the dropdown list.<br>
-                           *There will be different lists of cancers depending on the molecular type
-                           chosen in Step 1.
-                           <br>
-                           <div>
-                              <img src="static/images/2.PNG" style="width: 80%; border:2px #ccc solid;padding:5px;"><br>
-                           </div>
-                           <br>
+                        <br>
+                        Step 2. Choose the cancer type of interest from the dropdown list.
+                        <br>
+                        *There will be different lists of cancers depending on the molecular type
+                        chosen in Step 1.
+                        <br>
+                        <div>
+                           <img src="static/images/tutorial/cancer_gene_2.png" style="width: 80%; border:2px #ccc solid;padding:5px;"><br>
                         </div>
-
-                        <div style="color: black; font-size: 15px;  padding-bottom: 2px;">
-                           Step 3. Enter a gene name and click "Browse" to obtain the survival analysis results.
-                           Both the original p-values and adjusted p-values (BH corrected) will be listed.
-                           <br>
-                           <div>
-                              <img src="static/images/3.PNG" style="width: 80%; border:2px #ccc solid;padding:5px;"><br>
-                           </div>
-                           <br>
-                           Step 4. Choose a statistical method to explore the result. The user can click the
-                           survival mode of interest and the corresponding plots or tables will be generated.
-                           For example, if the user selects "Cox" and clicks "Progression-Free" (blue
-                           box) a hazard ratio plot and a table of  detailed numbers will be shown (red box). If
-                           the user selects "Log Rank", an interactive Kaplan-Meier plot will be shown (red box).
-                           *The user can customize the color/thickness of the lines in the Kaplan-Meier plot. For
-                           more detail, see <a class="log_rank_test">Log-Rank test</a>.
-                           <div>
-                              <img src="static/images/4.PNG" style="width: 80%; border:2px #ccc solid;padding:5px;"><br>
-                           </div>
-                           <br>
-                           Step 5. (optional) The user may remove feature(s) from the Cox regression or AFT model by unchecking the feature(s) and
-                           clicking "calculate". For example, after unchecking "Sex" and clicking "calculate", the results from the new Cox regression
-                           model are calculated on the fly, with output as follows:
-                           <div>
-                              <img src="static/images/5.PNG" style="width: 80%; border:2px #ccc solid;padding:5px;"><br>
-                           </div>
-                           <br>
-                           Step 6. (optional) The user can also specify a criteria for patients to be included in the analysis.
-                           By clicking "Download clinical data", a csv file for the clinical information will be downloaded. The user
-                           can select a subset of patients and upload the file for reanalysis. The reanalyzed results will be shown below the original
-                           results for easy comparison.
-                           <div>
-                              <img src="static/images/6.PNG" style="width: 80%; border:2px #ccc solid;padding:5px;"><br>
-                           </div>
-                           <br>
-                           Step 7. (optional) For mRNA, the user can further explore the correlation between a specific mRNA gene and its upstream CpG
-                           sites. By clicking the button labeled 450k or 27k, a pop-up window will show all the upstream CpG sites for
-                           the specified mRNA. For more details, see <a class="exp_methylation">mRNA & methylation</a>.
-                           <div>
-                              <img src="static/images/7.PNG" style="width: 80%; border:2px #ccc solid;padding:5px;"><br>
-                           </div>
+                        <br>
+                        Step 3. Enter a gene name and click "Browse" to obtain the survival analysis results.
+                        Both the original p-values and adjusted p-values (BH corrected) will be listed.
+                        <br>
+                        <div>
+                           <img src="static/images/tutorial/cancer_gene_3.png" style="width: 80%; border:2px #ccc solid;padding:5px;"><br>
                         </div>
+                        <br>
+                        Step 4. Choose a statistical method to explore the result. The user can click the
+                        survival mode of interest and the corresponding plots or tables will be generated.
+                        For example, if the user selects "Cox" and clicks "Progression-Free" (blue
+                        box) a hazard ratio plot and a table of  detailed numbers will be shown (red box). If
+                        the user selects "Log Rank", an interactive Kaplan-Meier plot will be shown (red box).
+                        <br>
+                        *The user can customize the color/thickness of the lines in the Kaplan-Meier plot. 
+                        For more detail, see <a class="log_rank_test">Log-Rank test</a>.
+                        <div>
+                           <img src="static/images/tutorial/cancer_gene_4.png" style="width: 80%; border:2px #ccc solid;padding:5px;"><br>
+                        </div>
+                        <br>
+                        Step 5. (optional) The user may remove feature(s) from the Cox regression or AFT model by unchecking the feature(s) and
+                        clicking "calculate". For example, after unchecking "Sex" and clicking "calculate", the results from the new Cox regression
+                        model are calculated on the fly, with output as follows:
+                        <div>
+                           <img src="static/images/tutorial/cancer_gene_5.png" style="width: 80%; border:2px #ccc solid;padding:5px;"><br>
+                        </div>
+                        <br>
+                        Step 6. (optional) For mRNA, the user can further explore the correlation between a specific mRNA gene and its upstream CpG sites. 
+                        By clicking the button labeled 450k or 27k, a pop-up window will show all the upstream CpG sites for the specified mRNA. The user can explore the survival analysis results or the beta values for this particular CpG site across different cancer types. 
+                        For more details, see <a class="mrna_methylation">mRNA & methylation</a>.
+                        <div>
+                           <img src="static/images/tutorial/cancer_gene_6.png" style="width: 80%; border:2px #ccc solid;padding:5px;"><br>
+                        </div>
+                        <br>
                      </div>
                   </div>
 
@@ -182,134 +177,118 @@
                         <br>
                         Step 1. Select a molecular type of interest from the list (red box shown below).
                         <div>
-                           <img src="static/images/8.PNG" style="width: 80%; border:2px #ccc solid;padding:5px;"><br>
+                           <img src="static/images/tutorial/select_cancer_1.png" style="width: 80%; border:2px #ccc solid;padding:5px;"><br>
                         </div>
                         <br>
-                     </div>
-                     <div style="color: black; font-size: 15px;  padding-bottom: 2px;">
                         Step 2. Choose the cacner type of interest from the dropdown list and click "Browse".
                         <br>
                         *There will be different lists of cancers depending on the molecular type chosen in Step 1.
                         <div>
-                           <img src="static/images/9.PNG" style="width: 80%; border:2px #ccc solid;padding:5px;"><br>
+                           <img src="static/images/tutorial/select_cancer_2.png" style="width: 80%; border:2px #ccc solid;padding:5px;"><br>
                         </div>
                         <br>
                         Step 3. Choose a statistical method to explore the results. All the features for the selected
                         molecular type for the selected cancer will be shown and ranked by their adjusted p-value (BH corrected)
                         in a table. Significant risks and protective features will be shown in red and green, respectively.
                         <div>
-                           <img src="static/images/10.PNG" style="width: 80%; border:2px #ccc solid;padding:5px;"><br>
+                           <img src="static/images/tutorial/select_cancer_3.png" style="width: 80%; border:2px #ccc solid;padding:5px;"><br>
                         </div>
                         <br>
                         Step 4. The user can click the feature (gene) of interest and the corresponding plot or table
                         will be generated below the table. For example, if the user selects "Cox" and clicks a specific gene
                         (blue box), a hazard ratio plot and a table with detailed numbers will be shown (red box). If the user
-                        selects "Log rank", an interactive Kaplan-Meier plot will be shown.<br>
+                        selects "Log rank", an interactive Kaplan-Meier plot will be shown.
+                        <br>
                         *The user can customize for color/thickness of the lines in the Kaplan-Meier plot. For more details,
                         see <a class="log_rank_test">Log-rank test</a>.
                         <div>
-                           <img src="static/images/11.PNG" style="width: 80%; border:2px #ccc solid;padding:5px;"><br>
+                           <img src="static/images/tutorial/select_cancer_4.png" style="width: 80%; border:2px #ccc solid;padding:5px;"><br>
                         </div>
                         <br>
                         Step 5. The user can select a survival type of interest to explore (red box) and the corresponding
                         table will be shown on the fly.
                         <div>
-                           <img src="static/images/12.PNG" style="width: 80%; border:2px #ccc solid;padding:5px;"><br>
+                           <img src="static/images/tutorial/select_cancer_5.png" style="width: 80%; border:2px #ccc solid;padding:5px;"><br>
                         </div>
                         <br>
                         Step 6. (optional) The user may remove feature(s) from the Cox regression or AFT model by unchecking
                         the features and clicking "calculate", the results from the new Cox regression model is calculated on
                         the fly, as follows:
                         <div>
-                           <img src="static/images/13.PNG" style="width: 80%; border:2px #ccc solid;padding:5px;"><br>
+                           <img src="static/images/tutorial/select_cancer_6.png" style="width: 80%; border:2px #ccc solid;padding:5px;"><br>
                         </div>
                         <br>
-                        Step 7. (optional) The user can also specify the criteria for the patients to be included in the
-                        analysis. By clicking "Download clinical data", a csv file for the clinical information will be
-                        downloaded. The user can select a subset of patients and upload the file for analysis. The reanalyzed
-                        result will be shown below the original results for easy comparison.
-                        <div>
-                           <img src="static/images/14.PNG" style="width: 80%; border:2px #ccc solid;padding:5px;"><br>
-                        </div>
-                        <br>
-                        Step 8. (optional) For mRNA, the user can further explore the correlation between a specific mRNA gene and its upstream CpG
+                        Step 7. (optional) For mRNA, the user can further explore the correlation between a specific mRNA gene and its upstream CpG
                         sites. By clicking the button labeled 450k or 27k, a pop-up window will show all the upstream CpG sites for
                         the specified mRNA. For more details, see <a class="exp_methylation">mRNA & methylation</a>.
                         <div>
-                           <img src="static/images/15.PNG" style="width: 80%; border:2px #ccc solid;padding:5px;"><br>
+                           <img src="static/images/tutorial/select_cancer_7.png" style="width: 80%; border:2px #ccc solid;padding:5px;"><br>
                         </div>
                         <br>
-                        <div>
-                           <img src="static/images/16.PNG" style="width: 80%; border:2px #ccc solid;padding:5px;"><br>
-                        </div>
+                        <br>
                      </div>
                   </div>
+
                   <!--Select gene-->
                   <div class="tutorialPage" style="display: none;">
                      <div style="color: red; font-size: 20px; font-weight: bold; padding-bottom: 5px;">
                         Select a Gene
                      </div>
                      <div style="color: black; font-size: 15px;  padding-bottom: 2px;">
-                        The user who is interested in specific gene can mouseover "Browse Database" and then go to
-                        "Select Gene" to browse the database.
+                        The user who is interested in specific gene can mouseover "Browse Database" and then go to "Select Gene" to browse the database.
                         <br>
                         <br>
                         Step 1. Select "Select Gene" (red box below).
                         <div>
-                           <img src="static/images/17.PNG" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
+                           <img src="static/images/tutorial/select_gene_1.png" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
                         </div>
                         <br>
                         Step 2 . Choose the cancer type of interest form the dropdown list and click "Browse".
                         <div>
-                           <img src="static/images/18.PNG" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
+                           <img src="static/images/tutorial/select_gene_2.png" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
                         </div>
                         <br>
-                        Step 3. Choose a Statistical method from the dropdown list to explore the results. The survival
-                        analysis results for the queried gene in all the cancer types will be shown and ranked by their
-                        adjusted p-values (BH corrected) in a table. Significant risks and protective features will be shown
-                        in red and green, respectively. *When methylation27k and methylation450k are loading, you are free to operate the current webpage.
+                        Step 3. Choose a Statistical method from the dropdown list to explore the results. 
+                        The survival analysis results for the queried gene across all cancer types will be displayed in a table and ranked by their adjusted p-values (BH corrected) in a table. 
+                        Significant risk and protective features will be shown in red and green, respectively. 
+                        <br>
+                        *When methylation27k and methylation450k are loading, you are free to operate the current webpage.
                         <div>
-                           <img src="static/images/19.PNG" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
+                           <img src="static/images/tutorial/select_gene_3.png" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
                         </div>
                         <br>
-                        Step 4. The user can click the feature (gene) of interest and the corresponding plot or table will
-                        be generated below the table. For example, if the user selects "Log Rank" and clicks Mesothelioma (MESO)
-                        (blue box) an interactive Kaplan-Meier plot will be shown (red box).<br>
-                        *The user can customize the color/thickness of lines in Kaplan-Meier plot. For more details, see
-                        <a class="log_rank_test">Log-rank test</a>.
+                        Step 4. The user can click the feature (gene) of interest and the corresponding plot or table will be generated below the table. 
+                        For example, if the user selects "Log Rank" and clicks Mesothelioma (MESO) (blue box) an interactive Kaplan-Meier plot will be shown (red box).
+                        <br>
+                        *The user can customize the color/thickness of the lines and the follow up threshold or values used to split patients in the Kaplan-Meier plot. 
+                        See <a class="log_rank_test">Log-rank test</a> for more details.
                         <div>
-                           <img src="static/images/20.PNG" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
+                           <img src="static/images/tutorial/select_gene_4.png" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
                         </div>
                         <br>
                         Step 5. The user can select a survival type of interest to explore (red box) and the corresponding table will
                         be shown on the fly.
                         <div>
-                           <img src="static/images/21.PNG" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
+                           <img src="static/images/tutorial/select_gene_5.png" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
                         </div>
                         <br>
                         Step 6. (optional) The user may remove feature(s) from the Cox regression or AFT model by unchecking the feature(s)
                         and clicking "calculate" (blue box). In the following example, after unchecking "Stage" and clicking "calculate" (which
                         violates PH assumption), the results from the new Cox regression model are calculated on the fly.
                         <div>
-                           <img src="static/images/22.PNG" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
+                           <img src="static/images/tutorial/select_gene_6.png" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
                         </div>
                         <br>
-                        Step 7. (optional) The user can also specify the criteria for patients to include in the analysis. By clicking
-                        "Download clinical data", a csv file for the clinical information will be downloaded. The user can select a subset
-                        of patients and upload the file for reanalysis. The reanalyzed result will be shown below the original results
-                        for easy comparison.
-                        <div>
-                           <img src="static/images/23.PNG" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
-                        </div>
-                        <br>
-                        Step 8. (optional) For mRNA, the user can further explore the correlation between a specific mRNA gene and its upstream CpG
+                        Step 7. (optional) For mRNA, the user can further explore the correlation between a specific mRNA gene and its upstream CpG
                         sites. By clicking the button labeled 450k or 27k, a pop-up window will show all the upstream CpG sites for
                         the specified mRNA. For more details, see <a class="exp_methylation">mRNA & methylation</a>.
                         <div>
-                           <img src="static/images/24.PNG" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
+                           <img src="static/images/tutorial/select_gene_7.png" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
                         </div>
+                        <br>
                      </div>
                   </div>
+
                   <!--Explore methylation & survival-->
                   <div class="tutorialPage" style="display: none;">
                      <div style="color: red; font-size: 20px; font-weight: bold; padding-bottom: 5px;">
@@ -324,7 +303,7 @@
                         click button labeled 450k or 27k. A pop-up window will show the survival analysis results
                         for all the upstream CpG sites for the gene of interest.
                         <div>
-                           <img src="static/images/25.PNG" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
+                           <img src="static/images/tutorial/methylation_leve_1.png" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
                         </div>
                         <br>
                         Step 2. Choose a statistical method from the dropdown list to explore the results.
@@ -332,41 +311,35 @@
                         and ranked by their adjusted p-valuee (BH corrected) in a table. Significant risks
                         and protective features will be shown in red and green, respectively.
                         <div>
-                           <img src="static/images/26.PNG" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
+                           <img src="static/images/tutorial/methylation_leve_2.png" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
                         </div>
                         <br>
                         Step 3. The user can click the CpG site of interest and the corresponding plot or table will
                         be generated below the table. For example, if the user selects "Log Rank" and selects a CpG
-                        site (blue box), an interactive Kaplan-Meier plot will be shown (red box).<br>
+                        site (blue box), an interactive Kaplan-Meier plot will be shown (red box).
+                        <br>
                         *The user can customize the color/thickness of the lines in the Kaplan-Meier plot. For more
                         details, see <a class="log_rank_test">Log-Rank test</a>.
                         <div>
-                           <img src="static/images/27.PNG" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
+                           <img src="static/images/tutorial/methylation_leve_3.png" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
                         </div>
                         <br>
                         Stpe 4. The user can select a survival type of interest (red box) and the corresponding
                         table will be shown on the fly.
                         <div>
-                           <img src="static/images/28.PNG" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
+                           <img src="static/images/tutorial/methylation_leve_4.png" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
                         </div>
                         <br>
                         Step 5. (optional) The user may remove feature(s) from the Cox regression or AFT model by
                         unchecking the feature(s) and clicking "calculate", which violates the PH assumption, the results
                         from the new Cox regression model are calculated on the fly.
                         <div>
-                           <img src="static/images/29.PNG" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
-                        </div>
-                        <br>
-                        Step 6. (optional) The user can also specify a criteria for patients to be included in the
-                        analysis. By clicking "Download clinical data", a csv file for the clinical information will
-                        be downloaded. The user can select a subset of patients and upload the file for reanalysis.
-                        The reanalyzed results will be shown below the original results easy comparison.
-                        <div>
-                           <img src="static/images/30.PNG" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
+                           <img src="static/images/tutorial/methylation_leve_5.png" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
                         </div>
                         <br>
                      </div>
                   </div>
+
                   <!--Two genes-->
                   <div class="tutorialPage" style="display: none;">
                      <div style="color: red; font-size: 20px; font-weight: bold; padding-bottom: 5px;">
@@ -381,48 +354,42 @@
                         <br>
                         Step 1. Select a combination of two genes from the list (red box shown below).
                         <div>
-                           <img src="static/images/31.PNG" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
+                           <img src="static/images/tutorial/two_gene_1.png" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
                         </div>
                         <br>
                         Step 2. Choose the cancer type of interest from the dropdown list.
                         <div>
-                           <img src="static/images/32.PNG" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
+                           <img src="static/images/tutorial/two_gene_2.png" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
                         </div>
                         <br>
                         Step 3. Enter two genes in the two text boxes (blue box) and select the groups (green box)
                         that are to be compared using log-rank test. Click "calculate".
                         <div>
-                           <img src="static/images/33.PNG" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
+                           <img src="static/images/tutorial/two_gene_3.png" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
                         </div>
                         <br>
                         Step 4. Choose a statistical method to explore the results. The user click the survival type of
                         interest and the corresponding plot or table will be generated. For example, if the user selects
                         "Log Rank" and clicks "Progression-Free" (blue box), an interactive Kaplan-Meier will be shown (red box).
                         If the user selects "Cox" and click "Progression-Free", a hazard ratio plot and a table with detailed
-                        numbers will be shown.<br>
+                        numbers will be shown.
+                        <br>
                         *The user can customize the color/thickness of the lines in the Kaplan-Meier plot. For more details,
                         see <a class="log_rank_test">Log-Rank test</a>.
                         <div>
-                           <img src="static/images/34.PNG" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
+                           <img src="static/images/tutorial/two_gene_4.png" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
                         </div>
                         <br>
                         Step 5. (optional) The user may remove feature(s) from the Cox regression or AFT model by unchecking
                         the feature(s) and clicking "calculate". For example, after unchecking "Sex" and clicking "calculate",
                         the results from the new Cox regression model are calculated on the fly.
                         <div>
-                           <img src="static/images/35.PNG" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
-                        </div>
-                        <br>
-                        Step 6. (optional)  The user can also specify the criteria for patients to be included in the
-                        analysis. By clicking "Download clinical data", a csv file with clinical information  will be downloaded.
-                        The user can select a subset of patients and upload the file for reanalysis. The reanalyzed results will be
-                        shown below the original results for easy comparison.
-                        <div>
-                           <img src="static/images/36.PNG" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
+                           <img src="static/images/tutorial/two_gene_5.png" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
                         </div>
                         <br>
                      </div>
                   </div>
+
                   <!-- > two genes-->
                   <div class="tutorialPage" style="display: none;">
                      <div style="color: red; font-size: 20px; font-weight: bold; padding-bottom: 5px;">
@@ -437,12 +404,12 @@
                         <br>
                         Step 1. Select ">2 genes" (red box shown below).
                         <div>
-                              <img src="static/images/37.PNG" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
+                              <img src="static/images/tutorial/more_gene_1.png" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
                         </div>
                         <br>
                         Step 2. Choose the cancer type of interest from the dropdown list.
                         <div>
-                              <img src="static/images/38.PNG" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
+                              <img src="static/images/tutorial/more_gene_2.png" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
                         </div>
                         <br>
                         Step 3. Enter the target mRNA genes, miRNA and lncRNA, in the first, second and third text box,
@@ -450,7 +417,7 @@
                         the entered gene by clicking wanted features. After all the genes have been filled in, click "calculate"
                         to implement the analysis.
                         <div>
-                              <img src="static/images/39.PNG" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
+                              <img src="static/images/tutorial/more_gene_3.png" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
                         </div>
                         <br>
                         Step 4. Choose a statistical method for analysis. The user can click the survival
@@ -458,51 +425,101 @@
                         selects "Cox" and clicks "Progression-Free" (blue box) a hazard ratio plot and a table with
                         detailed numbers will be shown (red box).
                         <div>
-                              <img src="static/images/40.PNG" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
+                              <img src="static/images/tutorial/more_gene_4.png" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
                         </div>
                         <br>
                         Step 5. (optional) The user may remove feature(s) from the Cox regression or AFT model by
                         unchecking the feature(s) and clicking "calculate". For example, after unchecking "Sex" and
                         clicking "calculate", the results from the new Cox regression model are calculated on the fly.
                         <div>
-                              <img src="static/images/41.PNG" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
-                        </div>
-                        <br>
-                        Step 6. (optional) A user can also specify the criteria for patients to be included in the analysis.
-                        By clicking "Download clinical data", a csv file for the clinical information will be downloaded.
-                        The user can select a subset of patients and upload the file for reanalysis. The reanalyzed results
-                        will be shown below the original results for easy comparison.
-                        <div>
-                              <img src="static/images/42.PNG" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
+                              <img src="static/images/tutorial/more_gene_5.png" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
                         </div>
                         <br>
                      </div>
                   </div>
+                  
+                  {% comment %} Analyze your data {% endcomment %}
+                  <div class="tutorialPage" style="display: none;">
+                     <div style="color: red; font-size: 20px; font-weight: bold; padding-bottom: 5px;">
+                        Analyze your data
+                     </div>
+
+                     <div style="color: black; font-size: 15px;  padding-bottom: 2px;">
+                        A User interested in running a log-rank test, Cox regression or AFT model on their own dataset can click on 'Analyze your data'.
+                        <div>
+                           <img src="static/images/tutorial/analyze_your_data_1.png" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
+                        </div>
+                        <br>
+                        Step 1. Click "Choose file" and select a file and then click "Load" to upload the file. 
+                        <br>
+                        * The uploaded data must have two columns, survival days and survival status, for survival analysis. 
+                        Users who are unsure about the file format can download the demo data by clicking on "Download demo data"
+                        <div>
+                           <img src="static/images/tutorial/analyze_your_data_2.png" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
+                        </div>
+                        <br>
+                        Step 2. From these dropdown lists, the user needs to select one column as survival day (number of days) and another column as survival status, respectively. 
+                        The user needs then choose whether to perform a log-rank test, Cox regression or AFT for survival analysis.
+                        <div>
+                           <img src="static/images/tutorial/analyze_your_data_4.png" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
+                        </div>
+                        <br>
+                        <div>
+                           <img src="static/images/tutorial/analyze_your_data_3.png" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
+                        </div>
+                        <br>
+                        Step 3. - Log Rank. 
+                        The user can select a column from the radio buttons and click 'Submit' (blue box). 
+                        An interactive Kaplan-Meier plot will be generated (red box). 
+                        <br>
+                        *The user can customize the color/thickness of the lines and the follow up threshold or values used to split patients in the Kaplan-Meier plot. 
+                        See <a class="log_rank_test">Log-Rank test</a> for more details.
+                        <div>
+                           <img src="static/images/tutorial/analyze_your_data_5.png" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
+                        </div>
+                        <br>
+                        Step 3. - Cox and AFT. 
+                        In Cox and AFT analysis, the use needs to choose whether the columns to be analyzed are continuous or categorical. 
+                        If the use chooses categorical features, the user needs to select a reference category.
+                        <div>
+                           <img src="static/images/tutorial/analyze_your_data_6.png" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
+                        </div>
+                        Click "Submit" (blue box) and the corresponding plot and table will be generated (red box).
+                        See <a class="cox_regression">Cox regression</a>, or <a class="aft_model">Accelerated Failure-Time model</a> for more details.
+                        <br>
+                        <div>
+                           <img src="static/images/tutorial/analyze_your_data_7.png" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
+                        </div>
+                        <br>
+                        <br>
+                     </div>
+                  </div>
+
+                  {% comment %} Log-rank Test {% endcomment %}
                   <div class="tutorialPage" style="display: none;">
                      <div style="color: red; font-size: 20px; font-weight: bold; padding-bottom: 5px;">
                         Log-rank Test
                      </div>
                      <div style="color: black; font-size: 15px;  padding-bottom: 2px;">
-                        By default, DoSurvive uses the <span style="color: red;">median to divide the data into two
-                           groups</span>, a high-performance group and a low-performance group, DoSurvive then
-                        conducts a Log-rank test. The cut-off is the expression is less than half is 0 or
-                        NA. The log-rank test yield the overall, disease-free, disease-specific, and progression-free
-                        p-value as well as the BH adjusted p-values (False-discovery
-                        rates).
+                        By default, DoSurvive uses the <span style="color: red;">median to divide the samples into two groups</span>, a high-expression group and a low-expression group, DoSurvive then conducts a Log-rank test for these two groups. 
+                        The log-rank test yields the overall, disease-free, disease-specific, and progression-free p-value as well as the BH adjusted p-values (False-discovery rates).
                         <div>
-                           <img src="static/images/43.PNG" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
+                           <img src="static/images/tutorial/logrank_1.png" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
                         </div>
                         <br>
-                        The user can click a gene they are interested in, and this will result in overall survival, disease-free
-                        survival, disease-specific survival and progression-free survival Kaplan-Meier plots. By default, the red
-                        line represents the high-performance group, the blue line represents the low-performance group, and n
-                        represents the sample sizes. DoSurvive allows the user to customize the Kaplan-Meier plot, i.e line thickness
-                        and color, size of plot, follow up threshold (years), and the percentages used to separate two groups of patients in Kapan-Merier plot. In addition, DoSurvive can automatically divide patients into two groups by adjusting the percentage cutoff by 5% increments and determine the best cutoff with the lowest p-value. Clicking "Submit" the Kaplan-Meier plot will be reproduced (red box).
+                        The user can click a gene they are interested in, and this will result in overall survival, disease-free survival, disease-specific survival and progression-free survival Kaplan-Meier plots. 
+                        By default, the red line represents the high-performance group, the blue line represents the low-performance group, and n represents the sample sizes. 
+                        DoSurvive allows the user to customize the Kaplan-Meier plot, i.e line thickness and color, size of plot, follow up threshold (years), and the percentages used to separate two groups of patients in Kapan-Merier plot. 
+                        In addition, DoSurvive can automatically divide patients into two groups by adjusting the percentage cutoff by 5% increments and determine the best cutoff with the lowest p-value. 
+                        DoSurvive also provides quartile, tertile, manual cutoff for dividing the data. Clicking "Submit" the Kaplan-Meier plot will be reproduced (red box).
                         <div>
-                           <img src="static/images/44.PNG" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
+                           <img src="static/images/tutorial/logrank_2.png" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
                         </div>
+                        <br>
                      </div>
                   </div>
+
+                  {% comment %} Cox Regression {% endcomment %}
                   <div class="tutorialPage" style="display: none;">
                      <div style="color: red; font-size: 20px; font-weight: bold; padding-bottom: 5px;">
                         Cox Proportional Hazard model (Cox Regression)
@@ -514,12 +531,13 @@
                         death) at a particular point in time. This rate is commonly referred to as the
                         hazard rate. Predictor variables (or factors) are usually termed covariates in
                         the survival-analysis literature.
-                        <p></p>
+                        <br>
+                        <br>
                         The Cox model is expressed in terms of the hazard function, denoted by h(t), which briefly can
                         be interpreted as the relative risk of dying between times t and t+s, given survival to time t
                         (where s is a small value). In the cox model, the form of the hazard function is given by :
                         <div>
-                           <img src="static/images/45.PNG" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
+                           <img src="static/images/tutorial/cox_3.png" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
                         </div>
                         <br>
                         In the Cox regression results, a p-value of < 0.05 for coefficient βi indicates that gene expression i
@@ -528,7 +546,7 @@
                         survival; Green signifies a p-value of < 0.05 and a negative coefficient (βi < 0), indicating that the
                         increase in the expression of this gene has a positive impact on survival.
                         <div>
-                           <img src="static/images/46.PNG" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
+                           <img src="static/images/tutorial/cox_1.png" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
                         </div>
                         <br>
                         In "Cox regression results", the user can also click a gene/survival type to plot the hazard ratio
@@ -536,18 +554,13 @@
                         p-values, and proportional hazard assumption p-values. The user can remove unwanted features from the
                         Cox model and reanalyze by unchecking variables (blue box) to get new results (red box).
                         <div>
-                           <img src="static/images/47.PNG" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
+                           <img src="static/images/tutorial/cox_2.png" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
                         </div>
                         <br>
-                        The user can also specify the criteria for patients to be included in the analysis. By clicking
-                        "Download clinical data", a csv file for the clinical information will be downloaded. The user
-                        can select a subset of patients and upload the file for reanalysis. The reanalyzed results will be
-                        shown below the original results for easy comparison.
-                        <div>
-                           <img src="static/images/48.png" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
-                        </div>
                      </div>
                   </div>
+
+                  {% comment %} Accelerated Failure-Time model (AFT) {% endcomment %}
                   <div class="tutorialPage" style="display: none;">
                      <div style="color: red; font-size: 20px; font-weight: bold; padding-bottom: 5px;">
                         Accelerated Failure-Time model (AFT)
@@ -571,29 +584,24 @@
                         <span style="color: #00EC00;">positive impact</span> 
                         on survival. In full generality, the accelerated failure time model can be specified as :
                         <div style="text-align:center;">
-                           <img src="static/images/49.PNG" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
+                           <img src="static/images/tutorial/aft_3.png" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
                         </div>
                         <br>
                         In the AFT results, the user can also click a gene/survival type to plot the time ratio.
                         <div>
-                           <img src="static/images/50.PNG" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
+                           <img src="static/images/tutorial/aft_1.png" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
                         </div>
                         <br>
                         The user can remove unwanted features from the AFT model and reanalyzed by unchecking
                         variables (blue box) to get new results (red box).
                         <div>
-                           <img src="static/images/51.PNG" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
+                           <img src="static/images/tutorial/aft_2.png" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
                         </div>
                         <br>
-                        The user can also specify the criteria for patients to be included in the analysis. By
-                        clicking "Download clinical data", a csv file for the clinical information will be downloaded.
-                        The user can select a subset of patients and upload the file for reanalysis. The reanalyzed
-                        results will be shown below the original result for easy comparison.
-                        <div>
-                           <img src="static/images/52.PNG" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
-                        </div>
                      </div>
                   </div>
+
+                  {% comment %} Expression/Methylation Profiles {% endcomment %}
                   <div class="tutorialPage" style="display: none;">
                      <div style="color: red; font-size: 20px; font-weight: bold; padding-bottom: 5px;">
                         Expression/Methylation Profiles
@@ -610,13 +618,13 @@
                         whether there is a significant difference between the expression levels in normal samples
                         and in tumor samples.
                         <div>
-                           <img src="static/images/53.PNG" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
+                           <img src="static/images/tutorial/expression_methylation_1.png" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
                         </div>
                         <br>
                         By clicking on features of interest, an interactive box plot of the expression levels
                         across cancer types will be generated.
                         <div>
-                           <img src="static/images/54.PNG" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
+                           <img src="static/images/tutorial/expression_methylation_2.png" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
                         </div>
                         <br>
                         * CpG sites: For a gene of interest, the user can retrieve the methylation levels of its upstream
@@ -624,10 +632,13 @@
                         survival analysis results and Expression profile of the methylation levels from the upstream CpG
                         sites will be shown (red box).
                         <div>
-                           <img src="static/images/55.PNG" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
+                           <img src="static/images/tutorial/expression_methylation_3.png" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
                         </div>
+                        <br>
                      </div>
                   </div>
+
+                  {% comment %} The Correlation of mRNA & Methylation {% endcomment %}
                   <div class="tutorialPage" style="display: none;">
                      <div style="color: red; font-size: 20px; font-weight: bold; padding-bottom: 5px;">
                         The Correlation of mRNA & Methylation
@@ -642,17 +653,20 @@
                         analysis results (red box) for the methylation levels detected from different methylation
                         arrays, i.e. Illumina Infinium HumanMethylation27 BeadChip and Illumina Infinium HumanMethylation450 BeadChip.
                         <div>
-                           <img src="static/images/56.PNG" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
+                           <img src="static/images/tutorial/correlation_methylation_1.png" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
                         </div>
                         <br>
                         By clicking the "Expression" tab, the user can select the CpG site of interest and then
                         click "Start" to explore the correlation between the expression level of the selected gene
                         and the methylation level of its upstream CpG site(s).
-                     </div>
-                     <div>
-                        <img src="static/images/57.PNG" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
+                        <div>
+                           <img src="static/images/tutorial/correlation_methylation_2.png" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
+                        </div>
+                        <br>
                      </div>
                   </div>
+
+                  {% comment %} Download data {% endcomment %}
                   <div class="tutorialPage" style="display: none;">
                      <div style="color: red; font-size: 20px; font-weight: bold; padding-bottom: 5px;">
                         Download data
@@ -662,29 +676,29 @@
                         Tables of all analysis results can be downloaded. The user can click "Download", "Copy", "CSV", "Excel", "PDF" or "Print"
                         to get the whole table.
                         <div>
-                           <img src="static/images/download1.PNG" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
+                           <img src="static/images/tutorial/download_data_1.png" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
                         </div>
                         <br>
                         <div>
-                           <img src="static/images/download2.PNG" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
+                           <img src="static/images/tutorial/download_data_2.png" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
                         </div>
                         <br>
                         In addition to the results table, all the clinical data used in the survival analysis can be downloaded
                         for further analysis.
                         <div>
-                           <img src="static/images/download3.PNG" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
+                           <img src="static/images/tutorial/download_data_3.png" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
                         </div>
                         <br>
                         The downloaded clinical data has been processed, "pathologic_stage" has been classified as a categorical variable, "0" to represent
                         early stage, "1" to represent lately stage. "gender" has been classified as a categorical variable, "0" to represent female, "1" to
                         represent male. Expression data has been normalized (red box). The remaining columns provide user reference and do not participate in the regression model.
                         <div>
-                           <img src="static/images/download4.PNG" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
+                           <img src="static/images/tutorial/download_data_4.png" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
                         </div>
                         <br>
-                        The Kaplan-Meier plot and forest plot in the survival analysis can be downloaded as PDF (red box below).
+                        The Kaplan-Meier plot and forest plot in the survival analysis can be downloaded as PDF with customized height and width (red boxes).
                         <div>
-                           <img src="static/images/download_data_download_plot.PNG" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
+                           <img src="static/images/tutorial/download_data_5.png" style="width: 100%; border:2px #ccc solid;padding:5px;"><br>
                         </div>
                         <br>
                      </div>
@@ -704,15 +718,26 @@
          $('.tutorialPage').hide();
          $('.tutorialPage').eq(index).show();
       })
-   })
+   });
 
    $('.log_rank_test').on('click', function () {
-         $('#log_rank_test').click();
-      })
+      $('#log_rank_test').click();
+   });
 
    $('.exp_methylation').on('click', function () {
-         $('#exp_methylation').click();
-      })
+      $('#exp_methylation').click();
+   });
 
+   $('.cox_regression').on('click', function () {
+      $('#cox_regression').click();
+   });
+
+   $('.aft_model').on('click', function () {
+      $('#aft_model').click();
+   });
+
+   $('.mrna_methylation').on('click', function () {
+      $('#mrna_methylation').click();
+   });
 </script>
 {% endblock %}

@@ -4,12 +4,12 @@ $(function () {
 
 var loadingFlag = 0
 function startLoading() {
-    if (MY_DATA.loadingFlag == 0) {
+    if (loadingFlag == 0) {
         $("body").loading();
         $('.loading-overlay-content').html('<img src="' + rootUrl + '/static/images/loading.gif" /> Loading...');
     }
 
-    MY_DATA.loadingFlag++;
+    loadingFlag++;
 }
 function stopLoading() {
     loadingFlag--;

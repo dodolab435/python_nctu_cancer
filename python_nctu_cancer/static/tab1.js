@@ -686,7 +686,6 @@ function getColumns(category, selectedType, subTab) {
                     data.push({
                         title: "",
                         render: function (data, type, row, meta) {
-                            var tmpFeatures = row[1].split("|");
                             return '<input type="button" value="27k" class="methylation-btn" onclick="showModal(event, \'methylation27k\', \'' + row[0] + '\', \'' + row[1] + '\')" />';
                         }
                     });
@@ -694,7 +693,6 @@ function getColumns(category, selectedType, subTab) {
                 data.push({
                     title: "",
                     render: function (data, type, row, meta) {
-                        var tmpFeatures = row[1].split("|");
                         return '<input type="button" value="450k" class="methylation-btn" onclick="showModal(event, \'methylation450k\', \'' + row[0] + '\', \'' + row[1] + '\')" />';
                     }
                 });
