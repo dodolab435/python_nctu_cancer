@@ -750,7 +750,9 @@ class Kmplotter:
                 response['message'] = "No patient was found in both groups"
                 
             return response
-        new_df = self.follow_up_threshold(new_df, status_col, day_col, time)
+        
+        if int(time) != 0:
+            new_df = self.follow_up_threshold(new_df, status_col, day_col, time)
 
         # print("@new_df = ", new_df)
         pval = self.log_rank(new_df, status_col, day_col, "group_by")

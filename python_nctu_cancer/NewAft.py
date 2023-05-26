@@ -502,20 +502,22 @@ class NewAft:
 
     def two_gene_aft_cox(self, tab, df, sur):
         if tab == "cox":
+            gene1_idx = ('Gene1')
+            gene2_idx = ('Gene2')
             fitter = CoxPHFitter()
         else:
+            gene1_idx = ('mu_', 'Gene1')
+            gene2_idx = ('mu_', 'Gene2')
             fitter = LogNormalAFTFitter()
         
         df.drop(['Hybridization REF'], axis=1, inplace=True)
-        fitter = CoxPHFitter()
 
         fitter.fit(df, duration_col='days_'+sur, event_col=sur+'_status')
         summary_df = fitter.summary
-
-        Gene1_coef = str(float(summary_df.loc[('Gene1')]['coef']))
-        Gene1_p_val = str(float(summary_df.loc[('Gene1')]['p']))
-        Gene2_coef = str(float(summary_df.loc[('Gene2')]['coef']))
-        Gene2_p_val = str(float(summary_df.loc[('Gene2')]['p']))
+        Gene1_coef = str(float(summary_df.loc[gene1_idx]['coef']))
+        Gene1_p_val = str(float(summary_df.loc[gene1_idx]['p']))
+        Gene2_coef = str(float(summary_df.loc[gene2_idx]['coef']))
+        Gene2_p_val = str(float(summary_df.loc[gene2_idx]['p']))
 
         return {
             "gene1_coef": str(format(float(Gene1_coef),'.2E')),
@@ -563,7 +565,6 @@ class NewAft:
 
                 new_df = self.drop_nan(new_df, "Gene1")
                 new_df = self.drop_nan(new_df, "Gene2")
-                num = new_df.shape[1]
                 new_df = self.transform(new_df, "Gene1")
                 new_df = self.transform(new_df, "Gene2")
 
@@ -616,7 +617,6 @@ class NewAft:
             new_df = self.get_exp1(new_df, g2_exp_df[g2_exp_df[index2] == gene2], gene2)
             new_df = self.drop_nan(new_df, gene1)
             new_df = self.drop_nan(new_df, gene2)
-            num = new_df.shape[1]
             new_df = self.transform(new_df, gene1)
             new_df = self.transform(new_df, gene2)
             
@@ -641,7 +641,7 @@ class NewAft:
                 ratio = "Hazard"
             else:
                 ratio = "Time"
-            
+            num = new_df.shape[0]
             plt_title = "%s, %s Ratio Plot(%s, n=%s)" % (cancer_type, ratio, mode, num)
             cox_data = self.aft_cox_img(tab, new_df, 'days_' + mode, mode + '_status', plt_title)
         except Exception as e:

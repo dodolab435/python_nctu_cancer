@@ -532,7 +532,7 @@ def mp_get_log_rank_pval(queue, new_df, exp_col, status_col, day_col, time, temp
     
     # multiprocessing process get log rank p-value
     kmplotter = Kmplotter()
-    new_df = kmplotter.seperate_group(new_df, exp_col, status_col, day_col, time, temp_L_per, temp_H_per)
+    new_df = kmplotter.seperate_group(new_df, exp_col, status_col, day_col, "groups", time, temp_L_per, temp_H_per)
     pval = kmplotter.log_rank(new_df, status_col, day_col)
     print("Pval %s" % pval)
     queue.put([float(pval), int(temp_L_per), int(temp_H_per)])
