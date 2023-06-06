@@ -1564,7 +1564,7 @@ class UpLoadSurvivalChartView(APIView):
             result["message"] = "A column with a continuous variable is expected.\nError: " + str(e)
         except Exception as e:
             result["status"] = "error"
-            result["message"] = "請確認上傳的資料是否正確與選擇正確的columns\n" + type(e).__name__  + ":" + str(e)
+            result["message"] = "Please confirm if the uploaded data is correct and select the appropriate columns.\n" + type(e).__name__  + ":" + str(e)
             
         return JsonResponse(result, safe=False)
 
@@ -1628,7 +1628,7 @@ class UpLoadSurvivalCoxView(APIView):
             
         except Exception as e:
             result["status"] = "error"
-            result["message"] = "請確認上傳的資料是否正確與選擇正確的columns\nError: " + str(e)
+            result["message"] = "Please confirm if the uploaded data is correct and select the appropriate columns.\nError: " + str(e)
         return JsonResponse(result, safe=False)
 
 from lifelines import LogNormalAFTFitter
@@ -1685,7 +1685,7 @@ class UpLoadSurvivalAftView(APIView):
             
         except Exception as e:
             result["status"] = "error"
-            result["message"] = "請確認上傳的資料是否正確與選擇正確的columns\nError: " + str(e)
+            result["message"] = "Please confirm if the uploaded data is correct and select the appropriate columns.\nError: " + str(e)
         return JsonResponse(result)
     
 class UpLoadGetColView(APIView):

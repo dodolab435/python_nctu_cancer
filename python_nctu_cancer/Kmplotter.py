@@ -536,9 +536,9 @@ class Kmplotter:
             chart_data = self.drawkmplot(df, status_col, day_col, 'groups')
 
             if int(time) in [3, 5, 10]:
-                chart_data[0]['layout']["title"] = time + " years, survival, p-val: %e" % (float(p_val))
+                chart_data[0]['layout']["title"] = time + " years, survival, p-val: %.2E" % (float(p_val))
             else:
-                chart_data[0]['layout']["title"] = "p-val: %.e" % (float(p_val))
+                chart_data[0]['layout']["title"] = "p-val: %.2E" % (float(p_val))
             # self.fig(data1,export_layout)
 
             response['chart_data'] = chart_data

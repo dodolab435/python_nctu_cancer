@@ -3,6 +3,13 @@ $(function () {
     $("label[name='group_1']").html("1");
     $("label[name='group_2']").html("2");
 
+    $("input[name='chgChartTime']").before('Patients were by median.&emsp;');
+    $(".chart-option-cutoff").hide();
+    $("#chart-HP").hide();
+    $("#chart-LP").hide();
+
+
+
     // disable dataTable's warning
     $.fn.dataTable.ext.errMode = 'none';
 
@@ -736,7 +743,6 @@ function downloadCoxTwoGene(mode, type, gene1, gene2, tab) {
 //     }
 // }
 
-$(".chart-option-cutoff").attr('disabled', true);
 
 function addChartDownloadButton($chart){
     var $download = '<div style="text-align:center; padding-bottom: 40px;"><a href="#" onclick="downloadTwoGene(\'' + MY_DATA.two_gene_options["mode"] + '\', \'' + MY_DATA.two_gene_options["type"] + '\', \'' + MY_DATA.two_gene_options["gene1"] + '\', \'' + MY_DATA.two_gene_options["gene2"] + '\', \'' + MY_DATA.two_gene_options["group1"] + '\', \'' + MY_DATA.two_gene_options["group2"] + '\')">Download clinical data</a></div>';
